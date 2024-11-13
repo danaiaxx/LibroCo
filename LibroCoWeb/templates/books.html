@@ -10,11 +10,11 @@
 <body>
     <nav>
         <a class="navbar-brand" href="{{ url_for('books') }}">
-            <img class="logoo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50" alt="LibroCo. Logo">
+            <img class="logo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50" alt="LibroCo. Logo">
         </a>
-        <div class="separatorr"></div>
-        <div class="navbar-linkss">
-            <a href="{{ url_for('books') }}" class="activee"> Books </a>
+        <div class="separator"></div>
+        <div class="navbar-links">
+            <a href="{{ url_for('books') }}" class="active"> Books </a>
             <a href="{{ url_for('requests') }}"> Requests </a>
             <a href="{{ url_for('readers') }}"> Readers </a>
         </div>
