@@ -357,8 +357,8 @@ a:activee {
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 2px 10px 15px rgba(0, 0, 0, 0.1); 
+    transform: translateY(-10px);
+    box-shadow: 2px 10px 15px rgba(0, 0, 0, 0.2); 
     cursor: pointer;
 }
 
