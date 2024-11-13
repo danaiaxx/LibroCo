@@ -46,20 +46,24 @@
     <div class="wishlist-content">
         <h2>Your Wishlist</h2>
 
+        <div class="book-container">
         {% if wishlist_books %}
             {% for book in wishlist_books %}
-                <div class="book-card">
-                    <a href="{{ url_for('view_book', book_id=book['book_id']) }}">
-                        <img src="{{ book['image_url'] }}" alt="{{ book['book_title'] }}">
-                        <h3>{{ book['book_title'] }}</h3>
-                        <p>{{ book['author'] }}</p>
-                    </a>
-                    <button class="remove-button" onclick="window.location.href='{{ url_for('remove_from_wishlist', book_id=book['book_id']) }}'">Remove</button>
+            <div class="flexerist">
+                <div class="card">
+                        <!-- Ensure the image URL is correct -->
+                        <img src="{{ url_for('static', filename=book['image']) }}" class="card-img-top" alt="{{ book['book_title'] }}">
+                        <div class="card-body" style="text-align: center; padding: 20px;">
+                            <h5 class="card-title" style="margin-top: 0%; margin-bottom: 0%;">{{ book['book_title'] }}</h5>
+                            <p class="card-text" style="margin-top: 0%; margin-bottom: 0%;">{{ book['author'] }}</p>
+                        </div>
                 </div>
+            </div>
             {% endfor %}
         {% else %}
             <p>Your wishlist is empty.</p>
         {% endif %}
+        </div>
     </div>
 
     <!-- Add JavaScript functions if needed -->
