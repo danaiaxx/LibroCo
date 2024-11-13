@@ -12,7 +12,7 @@
     width: auto;
     height: 2px;
     background-color: #ccc;
-    margin-top: 10px;a
+    margin-top: 10px;
     margin-left: 8px;
     margin-right: 8px;
 }
@@ -47,10 +47,14 @@
     padding:0;
 }
 
-.readers_list li{
-    white-space: nowrap; 
+.readers_list li {
+    cursor: pointer;
+    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; 
+    text-overflow: ellipsis;
+    padding: 0.5rem;
+    border-radius: 0.3rem;
+    transition: background-color 0.3s ease;
 }
 
 .readers_list::-webkit-scrollbar {
@@ -76,9 +80,13 @@
     background: #f1f1f1;
 }
 
-.readers_list li:nth-child(1) {
+
+.readers_list li:hover {
     background-color: #FFEDBD;
-    border-radius: 0.3rem;
+}
+
+.readers_list li.selected {
+    background-color: #FFEDBD;
     font-weight: bold;
 }
 

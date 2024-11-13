@@ -35,6 +35,7 @@
             <ol class="readers_list">
                 {% for reader in readers %}
                     <li data-name="{{ reader.name }}" data-email="{{ reader.email }}"
+                        data-contact="{{ reader.contact }}"
                         data-history="{{ ', '.join(reader.history) }}"
                         onclick="showReaderDetails(this)">{{ reader.name }}</li>
                 {% endfor %}
@@ -71,33 +72,44 @@
     </div>
 
     <script>
-    function showReaderDetails(element) {
-        // Get reader data from data attributes
-        const name = element.getAttribute('data-name');
-        const email = element.getAttribute('data-email');
-        const contact = element.getAttribute('data-contact') || ''; // Get contact or an empty string if none
-        const history = element.getAttribute('data-history').split(', ');
-
-        // Update profile details
-        document.querySelector('.name').textContent = name;
-        document.querySelector('.email_details').textContent = email;
-
-        // Show the contact label but only add contact details if available
-        const contactDetailsElement = document.querySelector('.contact_details');
-        contactDetailsElement.textContent = contact;
-
-        // Update book history
-        const bookList = document.querySelector('.book_list');
-        bookList.innerHTML = ''; // Clear previous history
-        history.forEach(book => {
-            const listItem = document.createElement('li');
-            listItem.textContent = book;
-            bookList.appendChild(listItem);
+        function showReaderDetails(element) {
+            // Get reader data from data attributes
+            const name = element.getAttribute('data-name');
+            const email = element.getAttribute('data-email');
+            const contact = element.getAttribute('data-contact');
+            const history = element.getAttribute('data-history').split(', ');
+    
+            // Update profile details
+            document.querySelector('.name').textContent = name;
+            document.querySelector('.email_details').textContent = email;
+            document.querySelector('.contact_details').textContent = contact;
+    
+            // Update book history
+            const bookList = document.querySelector('.book_list');
+            bookList.innerHTML = ''; // Clear previous history
+            history.forEach(book => {
+                const listItem = document.createElement('li');
+                listItem.textContent = book;
+                bookList.appendChild(listItem);
+            });
+        }
+    
+        // JavaScript for initializing the first reader
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstReader = document.querySelector('.readers_list li');
+            if (firstReader) {
+                firstReader.classList.add('selected');
+                showReaderDetails(firstReader);
+            }
         });
-    }
-</script>
 
-
+        // JavaScript for keeping the selected item highlighted
+        document.querySelectorAll('.readers_list li').forEach(item => {
+            item.addEventListener('click', function () {
+                document.querySelectorAll('.readers_list li').forEach(li => li.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
 </body>
-
 </html>
