@@ -73,6 +73,13 @@ body {
     text-decoration: none;
 }
 
+.card:hover .card-title,
+.card:hover .card-text {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip; 
+}
+
 .no-books-message {
     font-size: 18px;
     color: #999;

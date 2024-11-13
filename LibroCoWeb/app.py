@@ -275,6 +275,62 @@ def savebook()-> None:
     
     return redirect("/books")
 
+#Librarian View Book
+@app.route("/view_book_details/<int:book_id>")
+def view_book_details(book_id):
+    sql = "SELECT * FROM books WHERE book_id = ?"
+    book = getprocess(sql, (book_id,))
+
+    if book:
+        return render_template("view_book.html", book=book[0])
+    else:
+        flash("Book not found.", "error")
+        return redirect(url_for("books"))
+    
+#Librarian Edit Book
+# Route to edit book information
+@app.route('/book/edit/<int:book_id>', methods=['GET', 'POST'])
+def edit_book(book_id):
+    if request.method == 'POST':
+        # Get form data
+        book_title = request.form['book_title']
+        author = request.form['author']
+        publication_year = request.form['publication_year']
+        genre = request.form['genre']
+        description = request.form['description']
+        
+        # Check if a new image file is uploaded
+        image_upload = request.files['image_upload']
+        image_path = None
+        if image_upload and image_upload.filename != '':
+            image_filename = f"{book_id}_{image_upload.filename}"
+            image_path = os.path.join('static/images', image_filename)
+            image_upload.save(image_path)
+
+        # SQL update query
+        sql = """
+        UPDATE books
+        SET book_title = ?, author = ?, publication_year = ?, genre = ?, description = ?, image_path = ?
+        WHERE book_id = ?
+        """
+        params = (book_title, author, publication_year, genre, description, image_path, book_id)
+        
+        if postprocess(sql, params):
+            return redirect(url_for('view_book', book_id=book_id))
+        return "Error updating book", 500
+    
+    # Show edit form if GET request
+    book = getprocess("SELECT * FROM books WHERE book_id = ?", (book_id,))
+    if book:
+        return render_template('edit_book.html', book=dict(book[0]))
+    return "Book not found", 404
+
+# Route to list all books
+@app.route('/books')
+def list_books():
+    books = getall_records("books")
+    return render_template('list_books.html', books=books)
+
 #REQUESTS PAGE
 @app.route("/requests")
 def requests():
