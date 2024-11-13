@@ -55,9 +55,10 @@
                         <a href="{{ url_for('library') }}">
                             <button type="button" class="back_button">Back</button>
                         </a>
-                        <a href="{{ url_for('wishlist') }}">
+                        <a href="{{ url_for('add_to_wishlist', book_id=book['book_id']) }}">
                             <button type="button" class="addwishlist_button">Add To Wishlist</button>
-                        </a>
+                        </a>                        
+                        
                         <button type="submit" class="borrow_button">Borrow</button>
                     </div>
                     </form>

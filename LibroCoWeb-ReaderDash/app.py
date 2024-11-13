@@ -395,24 +395,28 @@ def my_books():
     # Your logic for the 'my_books' page
     return render_template("my_books.html")
 
+def convert_to_dict(row):
+    """Convert a sqlite3.Row object to a dictionary."""
+    return dict(row)
+
 @app.route("/wishlist")
 def wishlist():
     if 'user_id' not in session:
         flash("Please log in first.")
         return redirect(url_for("login"))
     
-    # Fetch the user's wishlist from the database
-    user_id = session.get('user_id')  # This should be outside the if block
+    user_id = session.get('user_id')  # Get the logged-in user_id
+
+    # Fetch wishlist books for the user
+    wishlist_sql = "SELECT * FROM wishlist WHERE user_id = ?"
+    wishlist_books = getprocess(wishlist_sql, (user_id,))
     
-    # Query to get all books in the user's wishlist (assuming a `wishlist` table)
-    sql = """
-    SELECT b.book_title, b.author, b.publication_year, b.genre
-    FROM wishlist w
-    JOIN books b ON w.book_id = b.book_id
-    WHERE w.user_id = ?
-    """
-    wishlist_books = getprocess(sql, (user_id,))
-    
+    # Debugging: print out wishlist_books to check if any data is being fetched
+    print(wishlist_books)
+
+    if wishlist_books:
+        wishlist_books = [convert_to_dict(book) for book in wishlist_books]  # Convert tuple to dict if needed
+
     return render_template("wishlist.html", wishlist_books=wishlist_books)
 
 # Route to add a book to the wishlist
@@ -422,21 +426,26 @@ def add_to_wishlist(book_id):
         flash("Please log in first.")
         return redirect(url_for("login"))
     
-    user_id = session.get('user_id')
+    user_id = session.get('user_id')  # Get the logged-in user_id
+
+    try:
+        # Check if the book is already in the wishlist
+        sql = "SELECT * FROM wishlist WHERE user_id = ? AND book_id = ?"
+        existing_entry = getprocess(sql, (user_id, book_id))
+        
+        if not existing_entry:  # If not in the wishlist
+            sql_insert = "INSERT INTO wishlist (user_id, book_id) VALUES (?, ?)"
+            postprocess(sql_insert, (user_id, book_id))  # Add the book to the wishlist
+            flash("Book added to wishlist!")
+        else:
+            flash("This book is already in your wishlist.")
     
-    # Check if the book is already in the wishlist
-    sql = "SELECT * FROM wishlist WHERE user_id = ? AND book_id = ?"
-    existing_entry = getprocess(sql, (user_id, book_id))
+    except Exception as e:
+        flash(f"An error occurred: {e}")
     
-    if not existing_entry:
-        # If not in wishlist, add it
-        sql_insert = "INSERT INTO wishlist (user_id, book_id) VALUES (?, ?)"
-        postprocess(sql_insert, (user_id, book_id))
-        flash("Book added to wishlist!")
-    else:
-        flash("This book is already in your wishlist.")
-    
-    return redirect(url_for("library"))
+    return redirect(url_for("wishlist"))  # Redirect to wishlist after adding the book
+
+
 
 # Route to remove a book from the wishlist
 @app.route("/remove_from_wishlist/<int:book_id>")
@@ -445,14 +454,17 @@ def remove_from_wishlist(book_id):
         flash("Please log in first.")
         return redirect(url_for("login"))
     
-    user_id = session.get('user_id')
+    user_id = session.get('user_id')  # Get the logged-in user_id
     
-    # Remove the book from the wishlist
-    sql_delete = "DELETE FROM wishlist WHERE user_id = ? AND book_id = ?"
-    postprocess(sql_delete, (user_id, book_id))
-    flash("Book removed from wishlist.")
+    try:
+        # Remove the book from the wishlist
+        sql_delete = "DELETE FROM wishlist WHERE user_id = ? AND book_id = ?"
+        postprocess(sql_delete, (user_id, book_id))  # Execute the delete query
+        flash("Book removed from wishlist.")
+    except Exception as e:
+        flash(f"An error occurred: {e}")
     
-    return redirect(url_for("wishlist"))
+    return redirect(url_for("wishlist"))  # Redirect back to the wishlist page
 
 @app.route("/some_route/<int:book_id>")
 def some_route(book_id):
