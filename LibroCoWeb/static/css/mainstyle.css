@@ -358,7 +358,10 @@ a:activee {
 
 .card:hover {
     transform: translateY(-5px);
+<<<<<<< Updated upstream
     box-shadow: 2px 10px 15px rgba(0, 0, 0, 0.1); 
+=======
+>>>>>>> Stashed changes
     cursor: pointer;
 }
 
