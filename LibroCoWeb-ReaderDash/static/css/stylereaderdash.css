@@ -120,12 +120,11 @@ nav a {
 .main-content {
     margin: 10px;
 }
+
 .header-row {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
     width: 100%;
 }
 .search-wrapper {
@@ -162,9 +161,7 @@ nav a {
     border: none;
     outline: none;
     padding: 5px;
-    margin-top: -3px;
     font-size: 15px;
-    border-radius: 5px;
 }
 
 /* Styling for the search button */

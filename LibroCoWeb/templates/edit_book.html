@@ -33,9 +33,10 @@
             <div class="form-group">
                 <label for="image_upload">Upload New Image (optional)</label>
                 <input type="file" id="image_upload" name="image_upload">
+                <p>Current image: <img src="{{ url_for('static', filename=book['image']) }}" alt="Current Image" width="100"></p>
             </div>
             <button type="submit" class="btn">Save Changes</button>
-            <a href="{{ url_for('view_book', book_id=book['book_id']) }}" class="btn cancel">Cancel</a>
+            <a href="{{ url_for('view_book_details', book_id=book['book_id']) }}" class="btn cancel">Cancel</a>
         </form>
     </div>
 </body>

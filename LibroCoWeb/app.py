@@ -298,32 +298,44 @@ def edit_book(book_id):
         publication_year = request.form['publication_year']
         genre = request.form['genre']
         description = request.form['description']
-        
+
         # Check if a new image file is uploaded
         image_upload = request.files['image_upload']
         image_path = None
         if image_upload and image_upload.filename != '':
+            # Generate a unique filename using the book_id to avoid filename conflicts
             image_filename = f"{book_id}_{image_upload.filename}"
-            image_path = os.path.join('static/images', image_filename)
+            image_path = os.path.join(uploadfolder, image_filename)
             image_upload.save(image_path)
+
+        # If no new image is uploaded, keep the current image path (if exists)
+        if not image_path:
+            book_data = getprocess("SELECT image FROM books WHERE book_id = ?", (book_id,))
+            image_path = book_data[0]['image'] if book_data else 'static/images/blank_image.png'
 
         # SQL update query
         sql = """
         UPDATE books
-        SET book_title = ?, author = ?, publication_year = ?, genre = ?, description = ?, image_path = ?
+        SET book_title = ?, author = ?, publication_year = ?, genre = ?, description = ?, image = ?
         WHERE book_id = ?
         """
         params = (book_title, author, publication_year, genre, description, image_path, book_id)
-        
+
+        # Update the book in the database
         if postprocess(sql, params):
-            return redirect(url_for('view_book', book_id=book_id))
-        return "Error updating book", 500
-    
+            flash("Book updated successfully")
+            return redirect(url_for('view_book_details', book_id=book_id))
+        flash("Error updating book")
+        return redirect(url_for('edit_book', book_id=book_id))
+
     # Show edit form if GET request
     book = getprocess("SELECT * FROM books WHERE book_id = ?", (book_id,))
     if book:
         return render_template('edit_book.html', book=dict(book[0]))
-    return "Book not found", 404
+    flash("Book not found")
+    return redirect(url_for('books'))
+
+
 
 # Route to list all books
 @app.route('/books')

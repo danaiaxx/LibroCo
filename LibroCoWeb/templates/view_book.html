@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylereaderdash.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/viewbookstyle.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <title> View Book | LibroCo. </title>
 </head>
-
 <body>
     <nav>
         <a class="navbar-brand" href="{{ url_for('books') }}">
@@ -27,38 +25,62 @@
             <a href="{{ url_for('logout') }}"> Log Out </a>
         </div>
     </nav>
-    <div class="divider"></div> <!-- Line divider -->
+    <div class="divider"></div>
 
     <div class="main-content">
         <div class="header-row">
             <div class="viewbook_container">
                 <div class="book_image">
                     <div class="overlay_wrapper">
-                        <img src="{{ url_for('static', filename='images/book_image.png') }}" class="responsive_image" alt="Book Image">
+                        {% if book['image'] %}
+                            <img src="{{ url_for('static', filename='images/' + book['image']) }}" class="responsive_image" alt="Book Image">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/blank_image.png') }}" class="responsive_image" alt="No Image Available">
+                        {% endif %}
                     </div>
                 </div>
-                <div class="viewbook_details">
+
+                <!-- <div class="viewbook_details">
                     <h3 class="book_title">{{ book['book_title'] }}</h3>
 					<h5 class="author"><strong>Author:</strong> {{ book['author'] }}</h5>
 					<h5 class="publication_year"><strong>Year:</strong> {{ book['publication_year'] }}</h5>
 					<h5 class="genre">Genre: <span class="genre_details">{{ book['genre'] }}</span></h5>
+					<h5 class="availability"> Availability: <span class="status">{{ book['availability'] }}</span></h5>
+					
+					<div class="description">{{ book['description'] }}</div>
+					
+					
+
+                    <div class="editbook_button_group">
+                        <a href="{{ url_for('books') }}">
+                            <button type="button" class="back_button">Back</button>
+                        </a>
+                        <a href="{{ url_for('wishlist') }}">
+                            <button type="button" class="addwishlist_button">Add To Wishlist</button>
+                        </a>
+                        <button type="submit" class="borrow_button">Borrow</button>
+                    </div>
+                    </form>
+                </div> -->
+                <div class="viewbook_details">
+                    <h3 class="book_title">{{ book['book_title'] }}</h3>
+                    <h5 class="author"><strong>Author:</strong> {{ book['author'] }}</h5>
+                    <h5 class="publication_year"><strong>Year:</strong> {{ book['publication_year'] }}</h5>
+                    <h5 class="genre">Genre: <span class="genre_details">{{ book['genre'] }}</span></h5>
                     <p><strong>Description:</strong> {{ book['description'] }}</p>
                     {% if book['image_path'] %}
                         <img src="{{ url_for('static', filename='images/' + book['image_path']) }}" alt="Book Image">
                     {% endif %}
-                    <div class="view_book_button">
-                        <a href="{{ url_for('books') }}">
-                            <button type="button" class="back_button">Back</button>
-                        </a>
-                        <a href="{{ url_for('edit_book', book_id=book['book_id']) }}" class="btn">Edit Book</a>
-                    </div>
+                    <a href="{{ url_for('books') }}">
+                        <button type="button" class="back_button">Back</button>
+                    </a>
+                    <a href="{{ url_for('edit_book', book_id=book['book_id']) }}" class="btn">Edit Book</a>
                 </div>
-				
             </div>
         </div>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+           document.addEventListener("DOMContentLoaded", function() {
                 const borrowButton = document.querySelector(".borrow_button");
                 const wishlistButton = document.querySelector(".addwishlist_button");
 
@@ -79,19 +101,8 @@
                     alert("Book added to your wishlist!");
                 });
             });
-            function readURL(input) {
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        // Display the selected image
-                        document.getElementById('image').src = e.target.result;
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
         </script>
 
 
 </body>
-
 </html>
