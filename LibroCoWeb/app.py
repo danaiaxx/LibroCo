@@ -360,12 +360,16 @@ def library():
         search_query = request.args.get('query', '').strip()
         
         if search_query:
-            # Filter books based on the search query, case-insensitive
+            # Filter books based on the search query (case-insensitive), checking title, author, or genre
             sql_books = """
             SELECT * FROM books
-            WHERE LOWER(book_title) LIKE ? OR LOWER(author) LIKE ? LIKE ? OR LOWER(genre) LIKE ?
+            WHERE LOWER(book_title) LIKE ? OR LOWER(author) LIKE ? OR LOWER(genre) LIKE ?
             """
-            books = getprocess(sql_books, (f'%{search_query.lower()}%', f'%{search_query.lower()}%'))
+            # Search will match any part of book title, author, or genre, case-insensitive
+            books = getprocess(sql_books, 
+                               (f'%{search_query.lower()}%', 
+                                f'%{search_query.lower()}%', 
+                                f'%{search_query.lower()}%'))
         else:
             books = getall_records('books')  # Fetch all books if no search query
 
@@ -373,6 +377,7 @@ def library():
     else:
         flash("You do not have permission to view this page.")
         return redirect(url_for("login"))
+
     
 @app.route("/viewbook/<int:book_id>")
 def view_book(book_id):
