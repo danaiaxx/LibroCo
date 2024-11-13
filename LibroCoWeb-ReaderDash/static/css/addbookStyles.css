@@ -411,8 +411,7 @@ padding-right: 0;
 margin-top: 2rem;
 }
 
-.back_button,
-.save_button {
+.back_button, .save_button {
 margin-left: 1rem;
 padding: 0.8rem 2rem;
 }
