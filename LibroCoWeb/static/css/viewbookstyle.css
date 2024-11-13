@@ -79,10 +79,6 @@ body {
     border-radius: 4px;
     cursor: pointer;
 }
-.back_button {
-    background-color: transparent;
-    color: #066A69;
-}
 .addwishlist_button {
     background-color: #ffedbd;
     color: #111010;
@@ -100,4 +96,44 @@ body {
     .book_image {
         margin-bottom: 20px; 
     }
+}
+
+.back_button {
+    background-color: transparent;
+    color: #066A69;
+    font-weight: normal;
+}
+
+.back_button:hover {
+    background-color: #969696;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #f5c400;
+    color: #111010;
+    font-weight: normal;
+}
+
+.btn, .back_button {
+    margin-left: 1rem;
+    /* Space between buttons */
+    padding: 0.8rem 2rem;
+    /* Button padding */
+}
+
+.view_book_button {
+    margin-top: 80px;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    gap: 3rem;
+    justify-content: flex-end;
+    /* Align buttons to the right */
+    margin-top: 2rem;
+    /* Space above buttons */
 }
