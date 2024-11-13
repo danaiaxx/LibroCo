@@ -180,6 +180,10 @@
     font-weight: normal;
 }
 
+.save_button:hover {
+    background-color: #e9aa17;
+}
+
 @media (max-width: 768px) {
     .addbook_container {
         flex-direction: column;

@@ -123,6 +123,10 @@
     font-weight: normal;
 }
 
+.save_button:hover {
+    background-color: #e9aa17;
+}
+
 .overlay_wrapper {
     position: relative;
     display: inline-block;

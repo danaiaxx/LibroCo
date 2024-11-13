@@ -116,6 +116,10 @@
     padding: 10px 20px;
 }
 
+.renew:hover {
+    background-color: #e9aa17;
+}
+
 /* Disabled button styling */
 .renew:disabled {
     background-color: #95a5a6; /* Grey for disabled state */

@@ -204,11 +204,10 @@ p {
   height: 54px;
   width: 100%;
   padding: 15px;
-  background-color: #FFCB44;
+  background-color: #f5c400;
   border: none;
   border-radius: 4px;
   font-size: 18px;
-  font-weight: bold;
   cursor: pointer;
 }
 
@@ -236,7 +235,7 @@ p {
   height: 54px;
   width: 130px;
   padding: 15px;
-  background-color: #FFCB44;
+  background-color: #f5c400;
   border: none;
   border-radius: 4px;
   font-size: 18px;
@@ -387,11 +386,10 @@ body .signup-mode .form-btn {
   height: 45px;
   width: 100%;
   padding: 5px;
-  background-color: #FFCB44;
+  background-color: #f5c400;
   border: none;
   border-radius: 5px;
   font-size: 18px;
-  font-weight: bold;
   cursor: pointer;
   margin: 20px auto auto auto;
 }
@@ -414,11 +412,10 @@ body .recovery-mode p {
     height: 54px;
     width: 30%;
     padding: 15px;
-    background-color: #FFCB44;
+    background-color: #f5c400;
     border: none;
     border-radius: 5px;
     font-size: 18px;
-    font-weight: bold;
     cursor: pointer;
     margin: 30px auto auto auto;
 
@@ -438,11 +435,10 @@ body .recovery-mode p {
       height: 54px;
       width: 30%;
       padding: 15px;
-      background-color: #FFCB44;
+      background-color: #f5c400;
       border: none;
       border-radius: 5px;
       font-size: 18px;
-      font-weight: bold;
       cursor: pointer;
       margin: 30px auto auto auto;
   

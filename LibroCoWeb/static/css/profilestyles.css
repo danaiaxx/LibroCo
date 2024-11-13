@@ -77,6 +77,10 @@
     cursor: pointer;
 }
 
+.edit_button:hover {
+    background-color: #e9aa17;
+}
+
 .book_history {
     display: flex;
     flex-direction: column;

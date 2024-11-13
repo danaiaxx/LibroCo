@@ -87,6 +87,11 @@ body {
     background-color: #f5c400;
     color: #111010;
 }
+
+.edit_button:hover {
+    background-color: #e9aa17;
+}
+
 @media (max-width: 768px) {
     .viewbook_container {
         flex-direction: column;
