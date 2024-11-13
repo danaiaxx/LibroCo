@@ -207,7 +207,6 @@ a:activee {
     border: none;
     outline: none;
     padding: 5px;
-    margin-top: -3px;
     font-size: 15px;
     border-radius: 5px;
 }
@@ -273,12 +272,6 @@ a:activee {
     text-decoration: none;
     color: white;
     font-weight: normal;
-}
-
-/* Search Bar Container */
-.search-container {
-    display: flex;
-    align-items: center;
 }
 
 /* Search Bar Styling */

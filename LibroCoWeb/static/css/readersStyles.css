@@ -111,12 +111,17 @@
 }
 
 .profile_image {
-    height: auto;
-    width: 100%;
-    max-width: 8.125rem;
+    height: 8.125rem;  /* Fixed height */
+    width: 8.125rem;   /* Fixed width */
     display: flex;
     justify-content: center;
     overflow: hidden;
+}
+
+.profile_image img {
+    width: 100%;         /* Makes the image take the full width of the container */
+    height: 100%;        /* Makes the image take the full height of the container */
+    object-fit: cover;   /* Ensures the image covers the container without distorting */
 }
 
 .profile_details {

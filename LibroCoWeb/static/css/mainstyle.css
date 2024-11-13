@@ -288,12 +288,6 @@ a:activee {
     font-weight: normal;
 }
 
-/* Search Bar Container */
-.search-container {
-    display: flex;
-    align-items: center;
-}
-
 /* Search Bar Styling */
 .search-bar {
     padding: 8px;
@@ -396,9 +390,15 @@ a:activee {
     text-decoration: none; /* Remove underline */
 }
 
-/* Optional: Remove underline on hover */
 .card a:hover {
     text-decoration: none;
+}
+
+.card:hover .card-title,
+.card:hover .card-text {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip; 
 }
 
 .no-books-message {

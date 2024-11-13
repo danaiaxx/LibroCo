@@ -28,6 +28,8 @@ def send_verification_code(email, user_code):
         print(f"Error sending email: {str(e)}")
         flash("There was an error sending the email. Please try again later.", "error")
 
+
+#LOGIN 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     error_message = None
@@ -67,6 +69,7 @@ def login():
 
     return render_template("login.html", pageheader="Login", error_message=error_message)
 
+#REGISTER
 @app.route("/create_account", methods=['GET', 'POST'])
 def create_account():
     error_message = None
@@ -108,6 +111,7 @@ def create_account():
 
     return render_template("create_acc.html", error_message=error_message)
 
+#ACCOUNT RECOVERY
 @app.route('/account-recovery', methods=['GET', 'POST'])
 def account_recov():
     error_message = None 
@@ -138,8 +142,7 @@ def account_recov():
     
     return render_template('account_recov.html', error_message=error_message)
 
-
-
+#SEND CODE
 @app.route('/send-code', methods=['GET', 'POST'])
 def send_code():
     email = session.get('user_email') 
@@ -162,6 +165,7 @@ def send_code():
     
     return render_template('send_code.html', user_code=result[0]['user_code'] if result else None) 
 
+#CHANGE PASS
 @app.route("/reset_pass", methods=['GET', 'POST'])
 def reset_pass():
     email = session.get('user_email')
@@ -203,6 +207,7 @@ def reset_pass():
 
     return render_template('reset_pass.html', error_message=error_message)
 
+#LIBRARIAN BOOKS PAGE
 @app.route("/books")
 def books() -> None:
     if 'user_id' not in session:
@@ -234,6 +239,12 @@ def books() -> None:
         flash("You do not have permission to view this page.")
         return redirect(url_for("login"))
     
+#ADD BOOK PAGE
+@app.route("/addbook")
+def addbook():
+    return render_template("addbook.html")
+
+#SAVE BOOK
 @app.route("/savebook", methods=['GET', 'POST'])
 def savebook()-> None:
     if not os.path.exists(uploadfolder):
@@ -264,14 +275,68 @@ def savebook()-> None:
     
     return redirect("/books")
 
-@app.route("/addbook")
-def addbook():
-    return render_template("addbook.html")
+#Librarian View Book
+@app.route("/view_book_details/<int:book_id>")
+def view_book_details(book_id):
+    sql = "SELECT * FROM books WHERE book_id = ?"
+    book = getprocess(sql, (book_id,))
 
+    if book:
+        return render_template("view_book.html", book=book[0])
+    else:
+        flash("Book not found.", "error")
+        return redirect(url_for("books"))
+    
+#Librarian Edit Book
+# Route to edit book information
+@app.route('/book/edit/<int:book_id>', methods=['GET', 'POST'])
+def edit_book(book_id):
+    if request.method == 'POST':
+        # Get form data
+        book_title = request.form['book_title']
+        author = request.form['author']
+        publication_year = request.form['publication_year']
+        genre = request.form['genre']
+        description = request.form['description']
+        
+        # Check if a new image file is uploaded
+        image_upload = request.files['image_upload']
+        image_path = None
+        if image_upload and image_upload.filename != '':
+            image_filename = f"{book_id}_{image_upload.filename}"
+            image_path = os.path.join('static/images', image_filename)
+            image_upload.save(image_path)
+
+        # SQL update query
+        sql = """
+        UPDATE books
+        SET book_title = ?, author = ?, publication_year = ?, genre = ?, description = ?, image_path = ?
+        WHERE book_id = ?
+        """
+        params = (book_title, author, publication_year, genre, description, image_path, book_id)
+        
+        if postprocess(sql, params):
+            return redirect(url_for('view_book', book_id=book_id))
+        return "Error updating book", 500
+    
+    # Show edit form if GET request
+    book = getprocess("SELECT * FROM books WHERE book_id = ?", (book_id,))
+    if book:
+        return render_template('edit_book.html', book=dict(book[0]))
+    return "Book not found", 404
+
+# Route to list all books
+@app.route('/books')
+def list_books():
+    books = getall_records("books")
+    return render_template('list_books.html', books=books)
+
+#REQUESTS PAGE
 @app.route("/requests")
 def requests():
     return render_template("requests.html")
 
+#READERS PAGE
 @app.route("/readers")
 def readers():
     all_users = getall_records("users")
@@ -296,8 +361,12 @@ def readers():
             "history": [h['book_title'] for h in history]
         })
 
+    # Sort readers by name in ascending order
+    readers_with_history = sorted(readers_with_history, key=lambda x: x['name'].lower())
+
     return render_template("readers.html", readers=readers_with_history)
 
+#READER'S BOOK HISTORY
 @app.route("/reader_history/<int:user_id>")
 def reader_history(user_id):
     sql_history = """
@@ -310,6 +379,7 @@ def reader_history(user_id):
     book_titles = [h['book_title'] for h in history]
     return {"history": book_titles}
 
+#EDIT READER'S PROFILE
 @app.route("/edit_reader")
 def edit_reader():
     return render_template("editreader.html")
@@ -318,6 +388,7 @@ def edit_reader():
 def update_reader():
     return render_template("editreader.html")
 
+#VIEW LIBRARIAN PROFILE
 @app.route("/profile")
 def profile():
     if 'user_id' not in session:
@@ -335,6 +406,7 @@ def profile():
         flash("User not found")
         return redirect(url_for("login"))
 
+#EDIT LIBRARIAN PROFILE
 @app.route("/edit_profile")
 def edit_profile():
     user_id = request.args.get('id', 1, type=int) 
@@ -348,6 +420,7 @@ def edit_profile():
         flash("User not found")
         return redirect(url_for("login"))
 
+#LOGOUT
 @app.route("/logout", methods=['GET'])
 def logout():
     print("Logout initiated.")  
@@ -359,6 +432,7 @@ def logout():
 def index():
     return render_template("login.html", pageheader="Login")
 
+#READER'S LIBRARY
 @app.route("/library")
 def library():
     if 'user_id' not in session:
@@ -391,6 +465,7 @@ def library():
         flash("You do not have permission to view this page.")
         return redirect(url_for("login"))
     
+#READER'S VIEW BOOK    
 @app.route("/viewbook/<int:book_id>")
 def view_book(book_id):
     sql = "SELECT * FROM books WHERE book_id = ?"
@@ -401,7 +476,7 @@ def view_book(book_id):
     else:
         flash("Book not found.", "error")
         return redirect(url_for("books"))
-        
+      
 @app.route("/book2/<int:book_id>")
 def book2(book_id):
     sql = "SELECT * FROM books WHERE book_id = ?"
@@ -413,10 +488,12 @@ def book2(book_id):
         flash("Book not found.", "error")
         return redirect(url_for("books"))
 
+#READER'S BORROWED BOOKS
 @app.route("/my_books")
 def my_books():
     return render_template("my_books.html")
 
+#READER'S WISHLIST
 @app.route("/wishlist")
 def wishlist():
     if 'user_id' not in session:

@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylereaderdash.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/wishliststyle.css') }}">
-    <link rel="icon" type="logo/icon" href="../static/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <title> Wishlist | LibroCo. </title>
 </head>
 
 <body>
     <nav>
-        <a class="navbar-brand" href="{{ url_for('library') }}"><img div class="logo" src="../static/images/logo.png" width="250" height="50" />
+        <a class="navbar-brand" href="{{ url_for('library') }}">
+            <img class="logo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50" />
         </a>
 
         <div class="separator"></div>
@@ -46,22 +47,31 @@
         <h2>Your Wishlist</h2>
 
         {% if wishlist_books %}
-            <!-- Display each book in the wishlist -->
-            <ul>
-                {% for book in wishlist_books %}
-                    <li>
+            {% for book in wishlist_books %}
+                <div class="book-card">
+                    <a href="{{ url_for('view_book', book_id=book['book_id']) }}">
+                        <img src="{{ book['image_url'] }}" alt="{{ book['book_title'] }}">
                         <h3>{{ book['book_title'] }}</h3>
-                        <p>Author: {{ book['author'] }}</p>
-                        <p>Year: {{ book['publication_year'] }}</p>
-                        <p>Genre: {{ book['genre'] }}</p>
-                    </li>
-                {% endfor %}
-            </ul>
+                        <p>{{ book['author'] }}</p>
+                    </a>
+                    <button class="remove-button" onclick="window.location.href='{{ url_for('remove_from_wishlist', book_id=book['book_id']) }}'">Remove</button>
+                </div>
+            {% endfor %}
         {% else %}
-            <!-- Message if no books are in the wishlist -->
             <p>Your wishlist is empty.</p>
         {% endif %}
     </div>
+
+    <!-- Add JavaScript functions if needed -->
+    <script>
+        function selectBook() {
+            // Your logic here
+        }
+
+        function deleteBook() {
+            // Your logic here
+        }
+    </script>
 
 </body>
 

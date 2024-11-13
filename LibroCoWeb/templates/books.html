@@ -44,18 +44,21 @@
         </div>
         <div class="divider" style="margin-bottom: 2%;"></div> <!-- Line divider -->
         <!-- <p class="no-books-message">No books have been added yet.</p> -->
-        <div class="book-container"> <!-- Added container for flex layout -->
+        <div class="book-container">
             {% for book in books %}
                 <div class="flexerist">
                     <div class="card">
-                        <img src="{{ book['image'] }}" class="card-img-top" alt="{{ book['title'] }}">
-                        <div class="card-body" style="text-align: center; padding: 20px;">
-                            <h5 class="card-title" style="margin-top: 0%; margin-bottom: 0%;">{{ book['book_title'] }}</h5>
-                            <p class="card-text" style="margin-top: 0%; margin-bottom: 0%;">{{ book['author'] }}</p>
-                        </div>
+                        <a href="{{ url_for('view_book', book_id=book['book_id']) }}" class="book-link">
+                            <img src="{{ book['image'] }}" class="card-img-top" alt="{{ book['title'] }}">
+                            <div class="card-body" style="text-align: center; padding: 20px;">
+                                <h5 class="card-title" style="margin-top: 0%; margin-bottom: 0%;">{{ book['book_title'] }}</h5>
+                                <p class="card-text" style="margin-top: 0%; margin-bottom: 0%;">{{ book['author'] }}</p>
+                            </div>
+                        </a>
                     </div>
                 </div>
             {% endfor %}
         </div>
+        
 </body>
 </html>
