@@ -305,6 +305,9 @@ def readers():
             "history": [h['book_title'] for h in history]
         })
 
+    # Sort readers by name in ascending order
+    readers_with_history = sorted(readers_with_history, key=lambda x: x['name'].lower())
+
     return render_template("readers.html", readers=readers_with_history)
 
 #READER'S BOOK HISTORY
