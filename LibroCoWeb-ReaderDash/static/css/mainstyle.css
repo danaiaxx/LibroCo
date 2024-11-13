@@ -274,12 +274,6 @@ a:activee {
     font-weight: normal;
 }
 
-/* Search Bar Container */
-.search-container {
-    display: flex;
-    align-items: center;
-}
-
 /* Search Bar Styling */
 .search-bar {
     padding: 8px;
