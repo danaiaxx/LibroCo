@@ -27,6 +27,13 @@ a:active {
 }
 
 .logo {
+    margin: -9px;
+    margin-right: 0;
+    margin-left: -9px;
+    margin-top: -9px;
+}
+/*
+.logo {
     margin-left: -2px;
     margin-top: -2px;
 }
@@ -37,7 +44,7 @@ a:active {
     margin-left: -9px;
     margin-top: -9px;
 }
-
+*/
 nav {
     display: flex;
     justify-content: flex-start;
@@ -63,7 +70,7 @@ nav {
     margin: 0 20px;
     margin-left: 20px;
 }
-
+/*
 .separatorr {
     height: 45.5px;
     width: 1px;
@@ -72,8 +79,9 @@ nav {
     margin-right: 20px;
     margin-top: 3px;
 }
-
+*/
 /* Styling for the main navigation links */
+/*
 .navbar-linkss {
     display: flex;
     margin-left: 3px;
@@ -81,7 +89,7 @@ nav {
     margin-top: 2px;
     font-size: 18px;
 }
-
+*/
 .navbar-links {
     display: flex;
     margin-top: -1px;
@@ -137,7 +145,7 @@ nav a {
     border-radius: 5px;
     font-weight: normal;
 }
-
+/*
 .activee {
     background-color: #ffedbd;
     border-radius: 5px;
@@ -145,12 +153,19 @@ nav a {
     padding: 10px;
     margin-left: 0px;
 }
-
+*/
+nav a:hover,
+a:active {
+    color: black;
+    border-radius: 10px;
+}
+/*
 nav a:hover,
 a:activee {
     color: black;
     border-radius: 10px;
 }
+*/
 
 
 /* Adjust the alignment for smaller screens */
