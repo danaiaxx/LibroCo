@@ -1,17 +1,18 @@
 .separator {
-    height: 45px;
+    height: 40px;
     width: 1px;
     background-color: #ddd;
-    margin-left: 28px;
+    margin-left: 20px;
     margin-top: 1px;
+    margin-right: 17px;
 }
 
 .navbar-links {
     display: flex;
-    margin-left: 3.5px;
-    gap: 24.5px;
-    margin-top: 1px;
-    font-size: 20px;
+    margin-left: 3px;
+    gap: 20px;
+    margin-top: 0px;
+    font-size: 18px;
 }
 
 .divider {
@@ -26,10 +27,10 @@
 .navbar-right {
     display: flex;
     margin-left: auto;
-    gap: 33px;
-    padding-right: 11.5px;
+    gap: 28px;
+    padding-right: 8px;
     margin-top: 3px;
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .container {
