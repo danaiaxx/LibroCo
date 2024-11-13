@@ -30,7 +30,7 @@
     <div class="profile_editcontainer">
         <div class="profile_image">
             <div class="overlay_wrapper">
-                <img src="{{ url_for('static', filename='images/' + (user['profile_image'] if user['profile_image'] else 'default-profile.png')) }}" class="responsive_image">
+                <img src="{{ url_for('static', filename='images/' + (user['profile_image'] if user['profile_image'] else 'default_profile.png')) }}" class="responsive_image">
                 <div class="image_overlay">
                     <img src="{{ url_for('static', filename='images/upload_photo.png') }}" class="upload">
                 </div>

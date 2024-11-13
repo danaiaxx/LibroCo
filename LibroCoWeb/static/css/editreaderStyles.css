@@ -1,27 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap');
-.navbar-right a {
-    transition: background-color 0.3s ease; 
+
+.divider {
+    width: auto;
+    height: 2px;
+    background-color: #ccc;
+    margin-top: 10px;
+    margin-left: 8px;
     margin-right: 8px;
-}
-
-.navbar-right a:hover {
-    background-color: #FFEDBD;
-    border-radius: 4px;
-}
-
-.logo {
-    margin-left: -2px;
-    margin-top: -2px;
-}
-
-.navbar-links a {
-    border-radius: 5px;
-    margin-top: .5rem;
-}
-
-* {
-    margin: 0;
-    padding: 0;
 }
 
 .container {
@@ -49,6 +34,9 @@
     max-height: 600px;
     overflow-y: auto;
     scrollbar-width: none;
+    display:block;
+    margin:0;
+    padding:0;
 }
 
 .readers_list::-webkit-scrollbar {
