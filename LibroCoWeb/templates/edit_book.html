@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Book Information</h1>
+
+        <form action="{{ url_for('update_book', book_id=book['book_id']) }}" method="POST" enctype="multipart/form-data">
+            <!-- Book Title -->
+            <div class="form-group">
+                <label for="book_title">Title:</label>
+                <input type="text" id="book_title" name="book_title" value="{{ book['book_title'] }}" required>
+            </div>
+
+            <!-- Author -->
+            <div class="form-group">
+                <label for="author">Author:</label>
+                <input type="text" id="author" name="author" value="{{ book['author'] }}" required>
+            </div>
+
+            <!-- Publication Year -->
+            <div class="form-group">
+                <label for="publication_year">Publication Year:</label>
+                <input type="number" id="publication_year" name="publication_year" value="{{ book['publication_year'] }}" required>
+            </div>
+
+            <!-- Genre -->
+            <div class="form-group">
+                <label for="genre">Genre:</label>
+                <input type="text" id="genre" name="genre" value="{{ book['genre'] }}" required>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required>{{ book['description'] }}</textarea>
+            </div>
+
+            <!-- Book Image -->
+            <div class="form-group">
+                <label for="image_upload">Book Image:</label>
+                <input type="file" id="image_upload" name="image_upload" accept="image/*">
+            </div>
+            
+            <button type="submit" class="btn">Save Changes</button>
+            <a href="{{ url_for('view_book', book_id=book['book_id']) }}" class="btn cancel">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

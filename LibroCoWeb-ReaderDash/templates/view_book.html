@@ -68,26 +68,26 @@
 
         <script>
            document.addEventListener("DOMContentLoaded", function() {
-        const borrowButton = document.querySelector(".borrow_button");
-        const wishlistButton = document.querySelector(".addwishlist_button");
+                const borrowButton = document.querySelector(".borrow_button");
+                const wishlistButton = document.querySelector(".addwishlist_button");
 
-        borrowButton.addEventListener("click", function() {
-            const isAvailable = document.querySelector(".status").textContent.trim() === "Available";
-            if (isAvailable) {
-                // Simulate borrow action
-                alert("You have successfully borrowed the book!");
-                document.querySelector(".status").textContent = "Unavailable"; // Update status
-                borrowButton.disabled = true;
-            } else {
-                alert("Sorry, this book is currently unavailable.");
-            }
-        });
+                borrowButton.addEventListener("click", function() {
+                    const isAvailable = document.querySelector(".status").textContent.trim() === "Available";
+                    if (isAvailable) {
+                        // Simulate borrow action
+                        alert("You have successfully borrowed the book!");
+                        document.querySelector(".status").textContent = "Unavailable"; // Update status
+                        borrowButton.disabled = true;
+                    } else {
+                        alert("Sorry, this book is currently unavailable.");
+                    }
+                });
 
-        wishlistButton.addEventListener("click", function() {
-            // Simulate adding to wishlist
-            alert("Book added to your wishlist!");
-        });
-    });
+                wishlistButton.addEventListener("click", function() {
+                    // Simulate adding to wishlist
+                    alert("Book added to your wishlist!");
+                });
+            });
         </script>
 
 
