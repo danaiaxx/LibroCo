@@ -204,7 +204,7 @@ def reset_pass():
     return render_template('reset_pass.html', error_message=error_message)
 
 @app.route("/books")
-def books()-> None:
+def books() -> None:
     if 'user_id' not in session:
         flash("Please log in first.")
         return redirect(url_for("login"))
@@ -213,13 +213,26 @@ def books()-> None:
     sql = "SELECT * FROM users WHERE user_id = ?"
     user = getprocess(sql, (user_id,))
 
-    if user and user[0]["user_id"] == 1: 
-        books: list = getall_records('books')
+    if user and user[0]["user_id"] == 1:  # Check if the user is a librarian (assuming user_id == 1 is the librarian)
+        search_query = request.args.get('query', '').strip()  # Get the search query from the URL, if any
+        
+        if search_query:
+            # Filter books based on the search query (case-insensitive), checking title, author, or genre
+            sql_books = """
+            SELECT * FROM books
+            WHERE LOWER(book_title) LIKE ? OR LOWER(author) LIKE ? OR LOWER(genre) LIKE ?
+            """
+            books = getprocess(sql_books, 
+                               (f'%{search_query.lower()}%', 
+                                f'%{search_query.lower()}%', 
+                                f'%{search_query.lower()}%'))
+        else:
+            books = getall_records('books')  # Fetch all books if no search query
+
         return render_template("books.html", books=books)
     else:
         flash("You do not have permission to view this page.")
-        return redirect(url_for("library")) 
-    
+        return redirect(url_for("login"))
     
 @app.route("/savebook", methods=['GET', 'POST'])
 def savebook()-> None:
@@ -377,7 +390,6 @@ def library():
     else:
         flash("You do not have permission to view this page.")
         return redirect(url_for("login"))
-
     
 @app.route("/viewbook/<int:book_id>")
 def view_book(book_id):
