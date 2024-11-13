@@ -30,7 +30,7 @@
             <form action="{{ url_for('library') }}" method="GET" class="search-container">
                 <input type="text" name="query" placeholder="Search a book, author, or etc." class="search-input" value="{{ request.args.get('query', '') }}">
                 <button type="submit" class="search-btn">
-                    <img src="{{ url_for('static', filename='images/magnify.png') }}" class="eks" alt="Search">
+                    <img src="{{ url_for('static', filename='images/magnify.png') }}" alt="Search">
                 </button>
             </form>
         </div>
