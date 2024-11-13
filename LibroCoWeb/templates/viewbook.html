@@ -12,22 +12,21 @@
 
 <body>
     <nav>
-        <a class="navbar-brand" href="{{ url_for('library') }}">
+        <a class="navbar-brand" href="{{ url_for('books') }}">
             <img div class="logo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50" />
         </a>
         
-
         <div class="separator"></div>
 
         <div class="navbar-links">
-            <a href="library.html" class="active"> Library </a>
-            <a href="mybooks.html"> My Books </a>
-            <a href="wishlist.html"> Wishlist </a>
+            <a href="{{ url_for('books') }}" class="active"> Library </a>
+            <a href="{{ url_for('request') }}"> My Books </a>
+            <a href="{{ url_for('readers') }}"> Wishlist </a>
         </div>
 
         <div class="navbar-right">
-            <a href="profile.html"> Profile </a>
-            <a href="logout.html"> Log Out </a>
+            <a href="{{ url_for('profile') }}"> Profile </a>
+            <a href="{{ url_for('logout') }}"> Log Out </a>
         </div>
     </nav>
     <div class="divider"></div> <!-- Line divider -->
@@ -42,27 +41,18 @@
                 </div>
 
                 <div class="viewbook_details">
-                    <h3 class="book_title">Bridgerton: The Duke and I</h3>
-                    <h5 class="author">Author: Julia Quinn</h5>
-                    <h5 class="publication_year">Year: 2000</h5>
-                    <h5 class="genre">Genre:
-                        <span class="genre_details">Romance</span>
-                    </h5>
-                    <h5 class="availability">Availability:<span class="status">Available</span>
-                    </h5>
-                    <div class="description">London, 1813. Daphne Bridgerton is keen to marry and start
-                        a family, but to date, all of the men she has met have regarded her as a friend
-                        and no more. Simon Bassett, Duke of Hastings has quite the opposite problem: he is
-                        regarded as the most eligible bachelor but desires nothing more than to remain single
-                        and childless. When Simon meets Daphne and learns of her troubles, he devises a plan
-                        that he believes will suit them both: they will feign a courtship. For Simon, the fake
-                        relationship will keep his would-be brides away, and for Daphne, Simon’s perceived
-                        interest in her will hopefully spur the other men of London to pursue her. The trouble
-                        is, plans rarely go according to plan, and it does not take long before their sham
-                        relationship starts to feel altogether too real.</div>
+                    <h3 class="book_title">{{ book['book_title'] }}</h3>
+					<h5 class="author"><strong>Author:</strong> {{ book['author'] }}</h5>
+					<h5 class="publication_year"><strong>Year:</strong> {{ book['publication_year'] }}</h5>
+					<h5 class="genre">Genre: <span class="genre_details">{{ book['genre'] }}</span></h5>
+					<h5 class="availability"> Availability: <span class="status">{{ book['availability'] }}</span></h5>
+					
+					<div class="description">{{ book['description'] }}</div>
+					
+					
 
                     <div class="editbook_button_group">
-                        <a href="{{ url_for('library') }}">
+                        <a href="{{ url_for('books') }}">
                             <button type="button" class="back_button">Back</button>
                         </a>
                         <a href="{{ url_for('wishlist') }}">
@@ -72,18 +62,31 @@
                     </div>
                     </form>
                 </div>
+				
             </div>
         </div>
 
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const statusElement = document.querySelector(".status");
-                const statusText = statusElement.textContent.trim();
+           document.addEventListener("DOMContentLoaded", function() {
+                const borrowButton = document.querySelector(".borrow_button");
+                const wishlistButton = document.querySelector(".addwishlist_button");
 
-                // Update the data-status attribute based on text content
-                if (statusText === "Available" || statusText === "Unavailable") {
-                    statusElement.setAttribute("data-status", statusText);
-                }
+                borrowButton.addEventListener("click", function() {
+                    const isAvailable = document.querySelector(".status").textContent.trim() === "Available";
+                    if (isAvailable) {
+                        // Simulate borrow action
+                        alert("You have successfully borrowed the book!");
+                        document.querySelector(".status").textContent = "Unavailable"; // Update status
+                        borrowButton.disabled = true;
+                    } else {
+                        alert("Sorry, this book is currently unavailable.");
+                    }
+                });
+
+                wishlistButton.addEventListener("click", function() {
+                    // Simulate adding to wishlist
+                    alert("Book added to your wishlist!");
+                });
             });
         </script>
 
