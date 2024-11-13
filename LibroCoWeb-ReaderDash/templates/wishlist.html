@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylereaderdash.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/wishliststyle.css') }}">
+    <link rel="icon" type="logo/icon" href="../static/images/favicon.ico">
+    <title> Wishlist | LibroCo. </title>
+</head>
+
+<body>
+    <nav>
+        <a class="navbar-brand" href="{{ url_for('library') }}"><img div class="logo" src="../static/images/logo.png" width="250" height="50" />
+        </a>
+
+        <div class="separator"></div>
+
+        <div class="navbar-links">
+            <a href="{{ url_for('library') }}"> Library </a>
+            <a href="{{ url_for('my_books') }}"> My Books </a>
+            <a href="{{ url_for('wishlist') }}" class="active"> Wishlist </a>
+        </div>
+
+        <div class="navbar-right">
+            <a href="{{ url_for('profile') }}"> Profile </a>
+            <a href="{{ url_for('logout') }}"> Log Out </a>
+        </div>
+    </nav>
+
+    <!-- Select Button Positioned Above the Line Divider -->
+    <div class="select-delete-wrapper">
+        <div class="button-container">
+            <!-- Select Book Button -->
+            <button class="select-button" onclick="selectBook()"> Select Book </button>
+            <!-- Delete Button -->
+            <button class="select-button delete-button" onclick="deleteBook()"> Delete </button>
+        </div>
+    </div>
+
+    <div class="divider"></div> <!-- Line divider -->
+
+    <!-- Wishlist Content -->
+    <div class="wishlist-content">
+        <h2>Your Wishlist</h2>
+
+        {% if wishlist_books %}
+            <!-- Display each book in the wishlist -->
+            <ul>
+                {% for book in wishlist_books %}
+                    <li>
+                        <h3>{{ book['book_title'] }}</h3>
+                        <p>Author: {{ book['author'] }}</p>
+                        <p>Year: {{ book['publication_year'] }}</p>
+                        <p>Genre: {{ book['genre'] }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <!-- Message if no books are in the wishlist -->
+            <p>Your wishlist is empty.</p>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

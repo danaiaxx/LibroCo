@@ -1,0 +1,186 @@
+.separator {
+    height: 45px;
+    width: 1px;
+    background-color: #ddd;
+    margin-left: 28px;
+    margin-top: 1px;
+}
+
+.navbar-links {
+    display: flex;
+    margin-left: 3.5px;
+    gap: 24.5px;
+    margin-top: 1px;
+    font-size: 20px;
+}
+
+.divider {
+    width: auto;
+    height: 2px;
+    background-color: #ccc;
+    margin-top: 10px;
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+.navbar-right {
+    display: flex;
+    margin-left: auto;
+    gap: 33px;
+    padding-right: 11.5px;
+    margin-top: 3px;
+    font-size: 20px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* Allow the container to fill the width of the screen */
+    padding: 20px; /* Optional padding for aesthetics */
+    box-sizing: border-box; /* Include padding in width calculations */
+}
+
+.book-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* Allow the book list to fill the width of the container */
+}
+
+.book-item {
+    display: flex;
+    align-items: flex-start; /* Align items to the top */
+    justify-content: space-between; /* Space between elements */
+    background-color: #f9f9f9; /* Light background for each book item */
+    margin: 10px 0; /* Space between book items */
+    border-radius: 5px; /* Rounded corners */
+    width: 100%; /* Allow each book item to fill the width */
+}
+
+.book-cover {
+    width: 150px; /* Set a fixed width for book covers */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 15px; /* Space between image and text */
+}
+
+.book-details {
+    flex-grow: 1; /* Allow text details to grow and fill space */
+    display: flex;
+    flex-direction: column; /* Stack title, author, and status vertically */
+}
+
+.book-title {
+    font-size: 18px; /* Title size */
+    font-weight: bold; /* Bold title */
+    margin: 0; /* Remove default margin */
+}
+
+.book-details p {
+    margin: 5px 0 0 0; /* Margin for author */
+    font-size: 15px; /* Smaller size for author */
+}
+
+.status {
+    font-size: 15px; /* Size for status */
+    font-style: italic; /* Italic for status */
+    font-weight: bold; /* Bold for status */
+}
+
+.return, .renew {
+    display: flex;
+    padding: 10px 15px; /* Padding for buttons */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px; /* Button font size */
+}
+
+.status.available {
+    color: #E3460D;
+}
+
+.status.expiring {
+    color: #009E05;
+}
+
+.return {
+    background-color: transparent; /* Red for return button */
+    color: #066A69;
+    margin-right: 10px; 
+    padding: 10px 20px;
+}
+
+.renew {
+    background-color: #FFCB44; /* Blue for renew button */
+    color: #111010; /* Ensure color is set correctly */
+    padding: 10px 20px;
+}
+
+/* Disabled button styling */
+.renew:disabled {
+    background-color: #95a5a6; /* Grey for disabled state */
+    color: #111010;
+    cursor: not-allowed; /* Change cursor to indicate non-clickable */
+}
+@media (max-width: 768px) {
+    .book-item {
+        flex-direction: column; /* Stack book cover and details vertically on smaller screens */
+        align-items: flex-start; /* Align items to the start */
+    }
+
+    .book-cover {
+        width: 100%; /* Make the book cover full width on smaller screens */
+        margin-bottom: 10px; /* Space below the cover */
+    }
+
+    .book-details {
+        margin-bottom: 10px; /* Add margin below book details */
+    }
+
+    .return, .renew {
+        width: 100%; /* Make buttons full width */
+        margin-right: 0; /* Remove right margin for buttons */
+        margin-bottom: 10px; /* Space below buttons */
+    }
+}
+
+@media (max-width: 768px) {
+    .book-item {
+        flex-direction: column; /* Stack book cover and details vertically on smaller screens */
+        align-items: center; /* Align items to the start */
+    }
+
+    .book-cover {
+        width: 80%; /* Make the book cover responsive on smaller screens */
+        margin-bottom: 10px; /* Space below the cover */
+    }
+
+    .book-details {
+        margin-bottom: 10px; /* Add margin below book details */
+        text-align: center;
+    }
+
+    .return, .renew {
+        width: 100%; /* Make buttons full width */
+        margin-right: 0; /* Remove right margin for buttons */
+        margin-bottom: 10px; /* Space below buttons */
+    }
+}
+
+@media (max-width: 480px) {
+    .book-title {
+        font-size: 16px; /* Smaller title size on very small screens */
+    }
+
+    .book-details p {
+        font-size: 14px; /* Smaller font for author on very small screens */
+    }
+
+    .status {
+        font-size: 14px; /* Smaller status size on very small screens */
+    }
+
+    .return, .renew {
+        font-size: 16px; /* Smaller button font size on very small screens */
+    }
+}

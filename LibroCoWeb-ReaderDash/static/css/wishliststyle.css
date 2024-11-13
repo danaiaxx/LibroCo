@@ -1,0 +1,48 @@
+.button-container {
+    margin-top: 10px;
+}
+
+.select-button {
+    background-color: #066a69;
+    /* Default color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 5px;
+    border-radius: 5px;
+    margin-top: -.3px;
+}
+
+.delete-button {
+    color: #6F0C0C;
+    background-color: #f8f8f8;
+    margin-left: -3px;
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+
+/* BOOK CARDS */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 20px;
+    padding: 20px;
+}
+
+.book-card {
+    /* background-color: #fff; */
+    border-radius: 5px;
+    padding: 10px;
+    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
+    text-align: center;
+}
+
+.book-card img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}

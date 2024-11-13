@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylereaderdash.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/librarystyles.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <title> Books | LibroCo </title>
+</head>
+
+<body>
+    <nav>
+        <a class="navbar-brand" href="{{ url_for('library') }}">
+            <img div class="logo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50" />
+        </a>
+        
+
+        <div class="separator"></div>
+
+        <div class="navbar-links">
+            <a href="{{ url_for('library') }}" class="active"> Library </a>
+            <a href="{{ url_for('my_books') }}"> My Books </a>
+            <a href="{{ url_for('wishlist') }}"> Wishlist </a>
+        </div>
+
+        <div class="navbar-right">
+            <a href="{{ url_for('profile') }}"> Profile </a>
+            <a href="{{ url_for('logout') }}"> Log Out </a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="header-row">
+            <div class="search-container">
+                <input type="text" placeholder="Search a book, author, or etc." class="search-input">
+                <button class="search-btn"><img src="{{ url_for('static', filename='images/magnify.png') }}"></button> <!-- Search icon -->
+            </div>
+        </div>  
+    </div>
+
+    <div class="divider"></div> <!-- Line divider -->
+
+    <div class="book-grid">
+        <!-- Book Card Example -->
+        <div class="book-card">
+            <a href="{{ url_for('view_book', book_id=10) }}">
+                <img src="{{ url_for('static', filename='images/Bridgerton.jpg') }}" alt="Bridgerton by Julia Quinn">
+                <h3>BRIDGERTON</h3>
+                <p>Julia Quinn</p>
+            </a>
+        </div>
+        
+        <div class="book-card">
+            <a href="{{ url_for('book2', book_id=13) }}">
+                <img src="{{ url_for('static', filename='images/olympus.jpg') }}" alt="Olympus Academy">
+                <h3>OLYMPUS ACADEMY</h3>
+                <p>Mahriyumm</p>
+            </a>
+        </div>      
+    </div>
+
+</body>
+
+</html>
