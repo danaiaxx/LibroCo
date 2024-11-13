@@ -142,3 +142,9 @@ body {
     margin-top: 2rem;
     /* Space above buttons */
 }
+
+.responsive_image {
+    width: 250px;
+    height: 400px; /* Fixed height to match the book cover size */
+    object-fit: cover; /* Ensures the image covers the area and fills the space */
+}
