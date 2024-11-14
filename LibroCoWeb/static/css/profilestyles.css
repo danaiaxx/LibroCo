@@ -13,6 +13,15 @@
     border-radius: 4px;
 }
 
+.divider {
+    width: auto;
+    height: 2px;
+    background-color: #ccc;
+    margin-top: 10px;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
 .profile_container {
     margin-top: 3rem;
     display: flex;

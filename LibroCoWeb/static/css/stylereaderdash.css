@@ -69,7 +69,7 @@ nav {
     margin-left: auto;
     gap: 28px;
     padding-right: 8px;
-    margin-top: 3px;
+    margin-top: -5px;
 }
 
 /* Style individual navbar links */
@@ -185,5 +185,6 @@ nav a {
     height: 2px;
     background-color: #ccc;
     margin-top: 10px;
-    margin-left: fixed;
+    margin-left: -8px;
+    margin-right: -8px;
 }
