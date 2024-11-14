@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -33,44 +32,47 @@
 
     <div class="scrollable-table">
         <table class="table">
-            <thead>
+            <tr>
+                <th>Book Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Status</th>
+                <th>Requested By</th>
+                <th>Approve</th>
+                <th>Decline</th>
+            </tr>
+            {% for request in requests %}
                 <tr>
-                    <th>Book Title</th>
-                    <th>Author</th>
-                    <th>Genre</th>
-                    <th>Status</th>
-                    <th>Requested By</th>
-                    <th>Approve</th>
-                    <th>Decline</th>
+                    <td>{{ request[0] }}</td> <!-- Book Title -->
+                    <td>{{ request[1] }}</td> <!-- Author -->
+                    <td>{{ request[2] }}</td> <!-- Genre -->
+                    <td class="status">
+                        {% if request[3] == 'Available' %}
+                            <span class="available">Available</span>
+                        {% else %}
+                            <span class="unavailable">Unavailable</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ request[4] }}</td> <!-- Requested By -->
+                    <td class="action-cell">
+                        <form action="{{ url_for('approve_request') }}" method="post">
+                            <input type="hidden" name="request_id" value="{{ request[5] }}">
+                            <button class="approve-btn">
+                                <img src="{{ url_for('static', filename='images/tsek.png') }}" class="tsek" alt="Approve">
+                            </button>
+                        </form>
+                    </td>
+                    <td class="action-cell">
+                        <form action="{{ url_for('decline_request') }}" method="post">
+                            <input type="hidden" name="request_id" value="{{ request[5] }}">
+                            <button class="decline-btn">
+                                <img src="{{ url_for('static', filename='images/eks.png') }}" class="eks" alt="Decline">
+                            </button>
+                        </form>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for request in books %}
-                    <tr>
-                        <td>{{ request['book_title'] }}</td>
-                        <td>{{ request['author'] }}</td>
-                        <td>{{ request['genre'] }}</td>
-                        <td>{{ request['status'] }}</td>  <!-- Display request status -->
-                        <td>{{ request['username'] }}</td>  <!-- Display user's name -->
-                        <td class="action-cell">
-                            <a href="{{ url_for('approve_request', request_id=request['request_id']) }}">
-                                <button class="approve-btn">
-                                    <img src="{{ url_for('static', filename='images/tsek.png') }}" class="tsek" alt="Approve">
-                                </button>
-                            </a>
-                        </td>
-                        <td class="action-cell">
-                            <a href="{{ url_for('decline_request', request_id=request['request_id']) }}">
-                                <button class="decline-btn">
-                                    <img src="{{ url_for('static', filename='images/eks.png') }}" class="eks" alt="Decline">
-                                </button>
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
+            {% endfor %}
         </table>
     </div>
 </body>
-
 </html>
