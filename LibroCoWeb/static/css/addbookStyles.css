@@ -9,6 +9,10 @@
             margin-right: 0;
         }
 
+        .form-group{
+            margin-top: 40px;
+        }
+
         .separator {
             height: 40px;
             width: 1px;
@@ -158,7 +162,7 @@
         }
 
         .addbook_button_group {
-            margin-top: 80px;
+            margin-top: 40px;
             display: flex;
             justify-content: flex-end;
             width: 100%;
