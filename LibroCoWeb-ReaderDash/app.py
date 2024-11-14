@@ -285,16 +285,13 @@ def savebook()-> None:
 def addbook():
     return render_template("addbook.html")
 
-#REQUESTS PAGE
 @app.route("/requests")
-def requests():  #Last change 10:41 11/14
     requests_data = get_pending_requests()  # Fetch pending requests from the database
     return render_template("requests.html", books=requests_data)
 
 @app.route("/request_book/<int:book_id>", methods=["POST"])
 def request_book(book_id): #Last change 10:41 11/14
     user_id = 1  # Replace with logic to get the current logged-in user's ID (e.g., from session or a user management system)
-
     # Check if the book is available
     sql = "SELECT availability FROM books WHERE book_id = ?"
     book = getprocess(sql, (book_id,))
