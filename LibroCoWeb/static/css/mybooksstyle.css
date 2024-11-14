@@ -101,11 +101,11 @@
 }
 
 .status.available {
-    color: #E3460D;
+    color: #009E05;
 }
 
 .status.expiring {
-    color: #009E05;
+    color: #E3460D;
 }
 
 .return {

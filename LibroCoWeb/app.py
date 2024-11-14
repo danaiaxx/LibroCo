@@ -529,6 +529,14 @@ def logout():
 @app.route("/")
 def index():
     return render_template("login.html", pageheader="Login")
+    return render_template('your_template.html', book={
+        'book_title': 'Example Book',
+        'author': 'Author Name',
+        'publication_year': '2024',
+        'genre': 'Fiction',
+        'description': 'This is a description of the book.',
+        'image': 'mermeed.png'
+    })
 
 #READER'S LIBRARY
 @app.route("/library")
