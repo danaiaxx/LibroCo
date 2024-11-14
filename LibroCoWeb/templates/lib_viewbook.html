@@ -35,8 +35,9 @@
                         {% if book['image'] %}
                             <img src="{{ url_for('static', filename='images/' + book['image']) }}" class="responsive_image" alt="{{ book['book_title'] }}">
                         {% else %}
-                            <img src="{{ url_for('static', filename='images/blank_image.png') }}" class="responsive_image" alt="No Image Available">
+                            <img src="{{ url_for('static', filename='images/mermeed.png') }}" class="responsive_image" alt="No Image Available">
                         {% endif %}
+
                     </div>
                 </div>
                             
