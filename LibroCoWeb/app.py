@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, flash, url_for, ses
 from dbhelper import *
 import os
 import random
+import sqlite3
 import string
 import logging
 
@@ -344,9 +345,45 @@ def list_books():
     return render_template('list_books.html', books=books)
 
 #REQUESTS PAGE
-@app.route("/requests")
+def get_requests():
+    # Connect to the database
+    conn = sqlite3.connect('libroco.db')
+    cursor = conn.cursor()
+    
+    # Query to get all requests along with book and user information
+    cursor.execute("""
+        SELECT books.book_title, books.author, books.genre, status.availability, users.user_name, requests.request_id
+        FROM requests
+        JOIN books ON requests.book_id = books.book_id
+        JOIN users ON requests.user_id = users.user_id
+        LEFT JOIN status ON books.book_id = status.book_id
+    """)
+    
+    # Fetch all results
+    requests = cursor.fetchall()
+    conn.close()
+    
+    return requests
+
+@app.route('/requests')
 def requests():
-    return render_template("requests.html")
+    # Get the list of requests
+    requests = get_requests()
+    return render_template('requests.html', requests=requests)
+
+@app.route('/approve_request', methods=['POST'])
+def approve_request():
+    request_id = request.form['request_id']
+    # Handle approval logic here (e.g., update status to Approved in the database)
+    # Redirect back to the requests page
+    return redirect(url_for('requests'))
+
+@app.route('/decline_request', methods=['POST'])
+def decline_request():
+    request_id = request.form['request_id']
+    # Handle decline logic here (e.g., delete or update status to Declined in the database)
+    # Redirect back to the requests page
+    return redirect(url_for('requests'))
 
 #READERS PAGE
 @app.route("/readers")
