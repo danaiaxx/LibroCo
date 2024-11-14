@@ -48,7 +48,7 @@
             {% for book in books %}
                 <div class="flexerist">
                     <div class="card">
-                        <a href="{{ url_for('view_book', book_id=book['book_id']) }}" class="book-link">
+                        <a href="{{ url_for('lib_viewbook', book_id=book['book_id']) }}" class="book-link">
                             <img src="{{ book['image'] }}" class="card-img-top" alt="{{ book['title'] }}">
                             <div class="card-body" style="text-align: center; padding: 20px;">
                                 <h5 class="card-title" style="margin-top: 0%; margin-bottom: 0%;">{{ book['book_title'] }}</h5>

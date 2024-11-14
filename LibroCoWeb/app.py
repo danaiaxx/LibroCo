@@ -293,13 +293,30 @@ def savebook()-> None:
     return redirect("/books")
 
 #Librarian View Book
+@app.route("/lib_viewbook/<int:book_id>")
+def lib_viewbook(book_id):
+    book = get_book_by_id(book_id)  # Fetch book details using the modified function
+    return render_template("lib_viewbook.html", book=book)
+
+# Add this function in your app.py or appropriate database utility file
+def get_book_by_id(book_id):
+    conn = sqlite3.connect('libroco.db')  # Your database file
+    conn.row_factory = sqlite3.Row  # This allows access by column name
+    cursor = conn.cursor()
+    query = "SELECT * FROM books WHERE book_id = ?"
+    cursor.execute(query, (book_id,))
+    book = cursor.fetchone()  # Fetch the row as a dictionary-like object
+    conn.close()
+    return book
+
+
 @app.route("/view_book_details/<int:book_id>")
 def view_book_details(book_id):
     sql = "SELECT * FROM books WHERE book_id = ?"
     book = getprocess(sql, (book_id,))
 
     if book:
-        return render_template("view_book.html", book=book[0])
+        return render_template("lib_viewbook.html", book=book[0])
     else:
         flash("Book not found.", "error")
         return redirect(url_for("books"))
