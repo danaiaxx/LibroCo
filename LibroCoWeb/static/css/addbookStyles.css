@@ -3,6 +3,12 @@
     src: url('/static/fonts/IstokWeb-Regular.ttf') format('truetype');
 }
 
+.logo {
+    /* OUR LOGO */
+    margin: -9px;
+    margin-right: 0;
+}
+
 .separator {
     height: 40px;
     width: 1px;
@@ -15,7 +21,7 @@
     display: flex;
     margin-left: 0%;
     gap: 20px;
-    margin-top: 3px;
+    margin-top: -1px;
 }
 
 /* Styling for the right-aligned links (Profile and Log Out) */

@@ -116,6 +116,15 @@ nav {
     border-radius: 4px;
 }
 
+.dividerr {
+    width: auto;
+    height: 2px;
+    background-color: #ccc;
+    margin-top: 10px;
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
 .navbar-right {
     display: flex;
     margin-left: auto;
