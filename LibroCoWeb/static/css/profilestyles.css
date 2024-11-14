@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap');
+@font-face {
+    font-family: 'Istok Web';
+    src: url('/static/fonts/IstokWeb-Regular.ttf') format('truetype');
+}
+
 .navbar-right a {
     transition: background-color 0.3s ease; 
     margin-right: 8px;
@@ -21,13 +25,18 @@
 }
 
 .profile_image {
-    height: auto;
-    width: 100%;
-    max-width: 8.125rem;
+    height: 8.125rem; /* Fixed height */
+    width: 8.125rem;  /* Fixed width */
     display: flex;
     justify-content: center;
-    align-items: stretch;
-    overflow: hidden;
+    align-items: center;
+    overflow: hidden; /* Ensures image is clipped to fit */
+}
+
+.profile_image img {
+    object-fit: cover; /* Ensures the image covers the area without distortion */
+    width: 100%;       /* Ensures image spans the full width of the container */
+    height: 100%;      /* Ensures image spans the full height of the container */
 }
 
 .profile_details {

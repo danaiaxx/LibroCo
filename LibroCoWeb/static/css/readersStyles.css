@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Istok+Web:wght@400;700&display=swap');
+@font-face {
+    font-family: 'Istok Web';
+    src: url('/static/fonts/IstokWeb-Regular.ttf') format('truetype');
+}
 /*
 .separator {
     height: 40px;

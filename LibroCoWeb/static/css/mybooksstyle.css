@@ -1,3 +1,8 @@
+@font-face {
+    font-family: 'Istok Web';
+    src: url('/static/fonts/IstokWeb-Regular.ttf') format('truetype');
+}
+
 .separator {
     height: 45px;
     width: 1px;

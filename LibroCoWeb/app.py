@@ -11,9 +11,6 @@ uploadfolder = "static/images/pictures"
 app.config['UPLOAD_FOLDER'] = uploadfolder
 app.secret_key = os.urandom(24) 
 
-from flask import Flask, render_template, request, redirect, session, url_for
-import os
-
 def generate_verification_code():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=5))
 
@@ -49,26 +46,29 @@ def login():
 
         if user:
             if user[0]["user_password"] == password:
+                # Store user_id in the session
                 session['user_id'] = user[0]["user_id"]
-                
-                if user[0]["user_id"] == 1:
-                    return redirect(url_for("books")) 
+                print("Session user_id set:", session['user_id'])
+
+                session.pop('error_message', None) 
+
+                # Redirect based on user type
+                if user[0]["user_id"] == 1:  # Check if the user is a librarian (assuming user_id == 1 is the librarian)
+                    return redirect(url_for("books"))
                 else:
                     return redirect(url_for("library"))
             else:
                 error_message = "Invalid email or password."
-                session['error_message'] = error_message  
         else:
             error_message = "No user found with that email."
-            session['error_message'] = error_message 
+        
+        session['error_message'] = error_message
+        return redirect(url_for("login"))
 
-        return redirect(url_for("login")) 
-
-    if 'error_message' in session:
-        error_message = session['error_message']
-        session.pop('error_message', None)  
-
+    # Retrieve error message from session if it exists
+    error_message = session.pop('error_message', None)
     return render_template("login.html", pageheader="Login", error_message=error_message)
+
 
 #REGISTER
 @app.route("/create_account", methods=['GET', 'POST'])
@@ -76,8 +76,7 @@ def create_account():
     error_message = None
 
     if 'error_message' in session:
-        error_message = session['error_message']
-        session.pop('error_message', None) 
+        error_message = session.pop('error_message', None)
 
     if request.method == 'POST':
         full_name = request.form.get("fullname")
@@ -88,10 +87,12 @@ def create_account():
             session['error_message'] = "Please fill in all fields."
             return redirect(url_for("create_account"))
 
+        # Validate email format
         if "@" not in email or "." not in email.split('@')[-1]:
             session['error_message'] = "Please provide a valid email address."
             return redirect(url_for("create_account"))
 
+        # Check if email already exists
         sql = "SELECT * FROM users WHERE user_email = ?"
         user = getprocess(sql, (email,))
 
@@ -99,13 +100,28 @@ def create_account():
             session['error_message'] = "Email is already in use."
             return redirect(url_for("create_account"))
 
+        # Generate a random user verification code
         user_code = ''.join(random.choices(string.digits, k=5))
 
+        # Insert new user into the database
         sql = 'INSERT INTO users (user_name, user_email, user_password, user_code) VALUES (?, ?, ?, ?)'
         params = (full_name, email, password, user_code)
+
         if postprocess(sql, params): 
-            flash("Account created successfully! Please log in.", "success")
-            return redirect(url_for("login"))
+            # Fetch the newly inserted user to retrieve the user_id
+            # Use a query to fetch the user using their email
+            sql = "SELECT * FROM users WHERE user_email = ?"
+            new_user = getprocess(sql, (email,))
+
+            if new_user:
+                # Set the user_id into the session
+                session['user_id'] = new_user[0]["user_id"]
+
+                flash("Account created successfully! Please log in.", "success")
+                return redirect(url_for("login"))
+            else:
+                session['error_message'] = "Failed to retrieve new user details."
+                return redirect(url_for("create_account"))
         else:
             session['error_message'] = "An error occurred while creating your account."
             return redirect(url_for("create_account"))
@@ -336,8 +352,6 @@ def edit_book(book_id):
     flash("Book not found")
     return redirect(url_for('books'))
 
-
-
 # Route to list all books
 @app.route('/books')
 def list_books():
@@ -440,20 +454,38 @@ def update_reader():
 #VIEW LIBRARIAN PROFILE
 @app.route("/profile")
 def profile():
+    print("Session data in profile route:", session)  # Debugging print
     if 'user_id' not in session:
         flash("Please log in first.")
         return redirect(url_for("login"))
     
     user_id = session.get('user_id')
-    sql = "SELECT user_full_name, user_email, user_contact, profile_image FROM users WHERE user_id = ?"
-    user = getprocess(sql, (user_id,))
     
-    if user:
-        user_data = user[0]
-        return render_template("profile.html", user=user_data)
+    # Check if the logged-in user is the librarian (user_id == 1)
+    if user_id == 1:
+        # Fetch the librarian's profile information, including the image from the profileimages table
+        sql = """
+        SELECT u.user_name, u.user_email, u.user_contact, p.user_image
+        FROM users u
+        LEFT JOIN profileimages p ON u.user_id = p.user_id
+        WHERE u.user_id = ?
+        """
+        user = getprocess(sql, (user_id,))
+        
+        if user:
+            user_data = user[0]
+            return render_template("profile.html", user=user_data)
+        else:
+            print("User not found.")
+            return redirect(url_for("login"))
     else:
-        flash("User not found")
+        flash("You do not have permission to view this page.")
         return redirect(url_for("login"))
+
+@app.before_request
+def before_request():
+    print("Session data:", session)
+
 
 #EDIT LIBRARIAN PROFILE
 @app.route("/edit_profile")
@@ -542,6 +574,37 @@ def book2(book_id):
 def my_books():
     return render_template("my_books.html")
 
+@app.route("/reader_profile")
+def reader_profile():
+    print("Session data in reader profile route:", session)  # Debugging print
+    if 'user_id' not in session:
+        flash("Please log in first.")
+        return redirect(url_for("login"))
+    
+    user_id = session.get('user_id')
+    
+    # Check if the logged-in user is not the librarian (user_id != 1)
+    if user_id != 1:
+        # Fetch the reader's profile information, including the image from the profileimages table
+        sql = """
+        SELECT u.user_name, u.user_email, u.user_contact, p.user_image
+        FROM users u
+        LEFT JOIN profileimages p ON u.user_id = p.user_id
+        WHERE u.user_id = ?
+        """
+        user = getprocess(sql, (user_id,))
+        
+        if user:
+            user_data = user[0]
+            return render_template("reader_profile.html", user=user_data)
+        else:
+            print("User not found.")
+            return redirect(url_for("login"))
+    else:
+        flash("You do not have permission to view this page.")
+        return redirect(url_for("login"))
+    
+
 #READER'S WISHLIST
 @app.route("/wishlist")
 def wishlist():
@@ -600,4 +663,10 @@ def some_route(book_id):
     return redirect(url_for("view_book", book_id=book_id))
 
 if __name__ == "__main__":
+    app.config.update(
+        SESSION_COOKIE_NAME='my_session',
+        SESSION_COOKIE_SECURE=False,  # Set this to True in production
+        SESSION_PERMANENT=False
+    )
+    app.debug = True
     app.run(debug=True)

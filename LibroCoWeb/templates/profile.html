@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/mainstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profilestyles.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <title> Profile | LibroCo. </title>
@@ -12,31 +12,30 @@
 
 <body>
     <nav>
-        <a class="navbar-brand" href="books.html"><img div class="logo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50" />
-        </a>
+        <a class="navbar-brand" href="{{ url_for('books') }}"><img class="logo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50" /></a>
 
         <div class="separator"></div>
 
         <div class="navbar-links">
-            <a href="books.html"> Books </a>
-            <a href="requests.html"> Requests </a>
-            <a href="readers.html"> Readers </a>
+            <a href="{{ url_for('books') }}"> Books </a>
+            <a href="{{ url_for('requests') }}"> Requests </a>
+            <a href="{{ url_for('readers') }}"> Readers </a>
         </div>
 
         <div class="navbar-right">
-            <a href="profile.html" class="active"> Profile </a>
-            <a href="logout.html"> Log Out </a>
+            <a href="{{ url_for('profile') }}" class="active"> Profile </a>
+            <a href="{{ url_for('logout') }}"> Log Out </a>
         </div>
     </nav>
     <div class="divider"></div> <!-- Line divider -->
 
     <div class="profile_container">
         <div class="profile_image">
-            <!-- Use default image if profile_image is not available -->
-            <img src="{{ url_for('static', filename='images/' + (user['profile_image'] if user['profile_image'] else 'default-profile.png')) }}">
+            <!-- Use default image if user_image is not available -->
+            <img src="{{ url_for('static', filename='images/' ~ (user['user_image'] if user['user_image'] else 'default_profile.png')) }}">
         </div>
         <div class="profile_details">
-            <h3 class="name">{{ user['user_full_name'] }}</h3>
+            <h3 class="name">{{ user['user_name'] }}</h3>
             <h5 class="label">Contact: <span class="phone_details">{{ user['user_contact'] }}</span></h5>
             <h5 class="label">Email: <span class="email_details">{{ user['user_email'] }}</span></h5>
         </div>

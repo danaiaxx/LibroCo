@@ -58,4 +58,3 @@ def getall_records(table: str) -> list:
         return []
     finally:
         db.close()  # Ensure the connection is closed
-
