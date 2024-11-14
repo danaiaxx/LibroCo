@@ -33,51 +33,42 @@
 
     <div class="scrollable-table">
         <table class="table">
-            <tr>
-                <th>Book Title</th>
-                <th>Author</th>
-                <th>Genre</th>
-                <th>Status</th>
-                <th>Requested By</th>
-                <th>Approve</th>
-                <th>Decline</th>
-            </tr>
-            {% for book in books%}
+            <thead>
                 <tr>
-                    <td>{{ book['book_title'] }}</td>
-                    <td>{{ book['author'] }}</td>
-                    <td>{{ book['genre'] }}</td>
-                    <td>{{ student[4] }}</td>
-                    <td>{{ student[5] }}</td>
-                    <td class="action-cell">
-                        <button class="approve-btn">
-                            <img src="{{ url_for('static', filename='images/tsek.png') }}" class="tsek" alt="Approve">
-                        </button>
-                    </td>
-                    <td class="action-cell">
-                        <button class="decline-btn">
-                            <img src="{{ url_for('static', filename='images/eks.png') }}" class="eks" alt="Decline">
-                        </button>
-                    </td>
+                    <th>Book Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Status</th>
+                    <th>Requested By</th>
+                    <th>Approve</th>
+                    <th>Decline</th>
                 </tr>
-            {% endfor%}
-                <tr>
-                    <td>Bridgerton: The Duke & I</td>
-                    <td>Julia Quinn</td>
-                    <td>Romance</td>
-                    <td class="status"><span class="available">Available</span></td>
-                    <td>Taylor Swift</td>
-                    <td class="action-cell">
-                        <button class="approve-btn">
-                            <img src="{{ url_for('static', filename='images/tsek.png') }}" class="tsek" alt="Approve">
-                        </button>
-                    </td>
-                    <td class="action-cell">
-                        <button class="decline-btn">
-                            <img src="{{ url_for('static', filename='images/eks.png') }}" class="eks" alt="Decline">
-                        </button>
-                    </td>
-                </tr>
+            </thead>
+            <tbody>
+                {% for request in books %}
+                    <tr>
+                        <td>{{ request['book_title'] }}</td>
+                        <td>{{ request['author'] }}</td>
+                        <td>{{ request['genre'] }}</td>
+                        <td>{{ request['status'] }}</td>  <!-- Display request status -->
+                        <td>{{ request['username'] }}</td>  <!-- Display user's name -->
+                        <td class="action-cell">
+                            <a href="{{ url_for('approve_request', request_id=request['request_id']) }}">
+                                <button class="approve-btn">
+                                    <img src="{{ url_for('static', filename='images/tsek.png') }}" class="tsek" alt="Approve">
+                                </button>
+                            </a>
+                        </td>
+                        <td class="action-cell">
+                            <a href="{{ url_for('decline_request', request_id=request['request_id']) }}">
+                                <button class="decline-btn">
+                                    <img src="{{ url_for('static', filename='images/eks.png') }}" class="eks" alt="Decline">
+                                </button>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 </body>

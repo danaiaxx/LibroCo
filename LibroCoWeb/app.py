@@ -345,8 +345,47 @@ def list_books():
 
 #REQUESTS PAGE
 @app.route("/requests")
-def requests():
-    return render_template("requests.html")
+def requests():  #Last change 10:41 11/14
+    requests_data = get_pending_requests()  # Fetch pending requests from the database
+    return render_template("requests.html", books=requests_data)
+
+@app.route("/request_book/<int:book_id>", methods=["POST"])
+def request_book(book_id): #Last change 10:41 11/14
+    user_id = 1  # Replace with logic to get the current logged-in user's ID (e.g., from session or a user management system)
+
+    # Check if the book is available
+    sql = "SELECT availability FROM books WHERE book_id = ?"
+    book = getprocess(sql, (book_id,))
+    if not book or book[0]['availability'] == 'Unavailable':
+        flash("Sorry, this book is unavailable.", "error")
+        return redirect(url_for('view_book', book_id=book_id))  # Redirect back to the book view
+
+    # If the book is available, insert the request into the `requests` table
+    sql = "INSERT INTO requests (user_id, book_id, status) VALUES (?, ?, 'Pending')"
+    if postprocess(sql, (user_id, book_id)):
+        flash("Your book request has been submitted successfully!", "success")
+    else:
+        flash("Failed to request the book. Please try again later.", "error")
+    
+    return redirect(url_for('view_book', book_id=book_id))  # Redirect back to the book's view page
+
+@app.route("/approve_request/<int:request_id>")
+def approve_request(request_id):
+    sql = "UPDATE requests SET status = 'Approved' WHERE request_id = ?"
+    if postprocess(sql, (request_id,)):
+        flash("Request approved.", "success")
+    else:
+        flash("Failed to approve request.", "error")
+    return redirect(url_for('requests'))
+
+@app.route("/decline_request/<int:request_id>")
+def decline_request(request_id):
+    sql = "UPDATE requests SET status = 'Declined' WHERE request_id = ?"
+    if postprocess(sql, (request_id,)):
+        flash("Request declined.", "error")
+    else:
+        flash("Failed to decline request.", "error")
+    return redirect(url_for('requests'))
 
 #READERS PAGE
 @app.route("/readers")
@@ -479,22 +518,43 @@ def library():
     
 #READER'S VIEW BOOK    
 @app.route("/viewbook/<int:book_id>")
-def view_book(book_id):
+def view_book(book_id): #Last change 10:17am 11/14
+    # Get book details from the database
     sql = "SELECT * FROM books WHERE book_id = ?"
     book = getprocess(sql, (book_id,))
-
-    if book:
-        return render_template("view_book.html", book=book[0])
-    else:
+    
+    if not book:
         flash("Book not found.", "error")
-        return redirect(url_for("books"))
+        return redirect(url_for('library'))  # Redirect to library if book not found
+    
+    book = book[0]  # Since we expect a single result, use the first record
+    
+    if request.method == "POST":
+        # Assume user is logged in and user_id is stored in the session
+        user_id = session.get("user_id")
+        if not user_id:
+            flash("You need to log in first!", "error")
+            return redirect(url_for('login'))  # Redirect to login page if user is not logged in
+        
+        # Insert request into the requests table
+        if insert_request(user_id, book_id):
+            flash("Your request has been submitted.", "success")
+            # Update the book availability or whatever logic you want
+        else:
+            flash("There was an error submitting your request.", "error")
+    
+    return render_template("view_book.html", book=book)
+
       
 @app.route("/book2/<int:book_id>")
-def book2(book_id):
+def book2(book_id): #Last change 10:17am 11/14
+    print("Accessed /book2 route with book_id:", book_id)  # Debugging message
     sql = "SELECT * FROM books WHERE book_id = ?"
     book = getprocess(sql, (book_id,))
 
+    # Check if the book exists
     if book:
+        print("Book data from /book2:", book)  # Print book data
         return render_template("view_book.html", book=book[0])
     else:
         flash("Book not found.", "error")

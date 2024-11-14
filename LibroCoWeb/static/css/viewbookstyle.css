@@ -14,12 +14,32 @@ body {
     gap: 2rem;
 }
 
+.book2_containerr {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+    gap: 2rem;
+}
+
 .viewbook_details {
     display: flex;
     flex-direction: column;
 }
 
 .book_image img {
+    width: none;
+    max-width: 290px;
+    max-height: auto;
+    display: block; 
+    position: relative;
+}
+
+.book_imagee img {
     width: none;
     max-width: 290px;
     max-height: auto;
@@ -59,6 +79,7 @@ body {
     box-sizing: border-box;
     border: none;
     scrollbar-width: none;
+    text-align: justify;
 }
 .description::-webkit-scrollbar {
     display: none;
@@ -98,7 +119,16 @@ body {
         align-items: center;
     }
 
+    .book2_containerr {
+        flex-direction: column;
+        align-items: center;
+    }
+
     .book_image {
+        margin-bottom: 20px; 
+    }
+
+    .book_imagee {
         margin-bottom: 20px; 
     }
 }

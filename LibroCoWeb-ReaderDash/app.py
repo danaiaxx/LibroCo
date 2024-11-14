@@ -286,8 +286,46 @@ def addbook():
     return render_template("addbook.html")
 
 @app.route("/requests")
-def requests():
-    return render_template("requests.html")
+    requests_data = get_pending_requests()  # Fetch pending requests from the database
+    return render_template("requests.html", books=requests_data)
+
+@app.route("/request_book/<int:book_id>", methods=["POST"])
+def request_book(book_id): #Last change 10:41 11/14
+    user_id = 1  # Replace with logic to get the current logged-in user's ID (e.g., from session or a user management system)
+    # Check if the book is available
+    sql = "SELECT availability FROM books WHERE book_id = ?"
+    book = getprocess(sql, (book_id,))
+    if not book or book[0]['availability'] == 'Unavailable':
+        flash("Sorry, this book is unavailable.", "error")
+        return redirect(url_for('view_book', book_id=book_id))  # Redirect back to the book view
+
+    # If the book is available, insert the request into the `requests` table
+    sql = "INSERT INTO requests (user_id, book_id, status) VALUES (?, ?, 'Pending')"
+    if postprocess(sql, (user_id, book_id)):
+        flash("Your book request has been submitted successfully!", "success")
+    else:
+        flash("Failed to request the book. Please try again later.", "error")
+    
+    return redirect(url_for('view_book', book_id=book_id))  # Redirect back to the book's view page
+
+@app.route("/approve_request/<int:request_id>")
+def approve_request(request_id):
+    sql = "UPDATE requests SET status = 'Approved' WHERE request_id = ?"
+    if postprocess(sql, (request_id,)):
+        flash("Request approved.", "success")
+    else:
+        flash("Failed to approve request.", "error")
+    return redirect(url_for('requests'))
+
+@app.route("/decline_request/<int:request_id>")
+def decline_request(request_id):
+    sql = "UPDATE requests SET status = 'Declined' WHERE request_id = ?"
+    if postprocess(sql, (request_id,)):
+        flash("Request declined.", "error")
+    else:
+        flash("Failed to decline request.", "error")
+    return redirect(url_for('requests'))
+
 
 @app.route("/readers")
 def readers():
@@ -360,35 +398,34 @@ def library():
         flash("You do not have permission to view this page.")
         return redirect(url_for("books"))  # Redirect admins to the books page
     
-@app.route("/viewbook/<int:book_id>")
+@app.route("/view_book/<int:book_id>")
 def view_book(book_id):
-    # Fetch book details from the database using the book_id
+    print("Accessed /view_book route with book_id:", book_id)  # Debugging message
     sql = "SELECT * FROM books WHERE book_id = ?"
     book = getprocess(sql, (book_id,))
 
     # Check if the book exists
     if book:
-        # If the book exists, render the template with the book details
+        print("Book data from /view_book:", book)  # Print book data
         return render_template("view_book.html", book=book[0])
     else:
-        # If the book doesn't exist, show an error message
         flash("Book not found.", "error")
         return redirect(url_for("books"))
-        
+
 @app.route("/book2/<int:book_id>")
 def book2(book_id):
-    # Fetch book details from the database using the book_id
+    print("Accessed /book2 route with book_id:", book_id)  # Debugging message
     sql = "SELECT * FROM books WHERE book_id = ?"
     book = getprocess(sql, (book_id,))
 
     # Check if the book exists
     if book:
-        # If the book exists, render the template with the book details
+        print("Book data from /book2:", book)  # Print book data
         return render_template("view_book.html", book=book[0])
     else:
-        # If the book doesn't exist, show an error message
         flash("Book not found.", "error")
         return redirect(url_for("books"))
+
 
 @app.route("/my_books")
 def my_books():

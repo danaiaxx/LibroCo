@@ -59,3 +59,20 @@ def getall_records(table: str) -> list:
     finally:
         db.close()  # Ensure the connection is closed
 
+
+def insert_request(user_id: int, book_id: int):
+    data = {
+        "user_id": user_id,
+        "book_id": book_id,
+    }
+    return add_record("requests", **data)  # Use add_record to insert a new request
+
+def get_pending_requests():
+    sql = '''
+    SELECT books.book_title, books.author, books.genre, requests.request_date, users.username
+    FROM requests
+    JOIN books ON requests.book_id = books.book_id
+    JOIN users ON requests.user_id = users.user_id
+    WHERE requests.status = 'Pending'  -- You can filter requests based on status (e.g., Pending, Approved)
+    '''
+    return getprocess(sql)
