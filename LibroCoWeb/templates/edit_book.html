@@ -72,9 +72,9 @@
                 <label for="description">Description</label>
                 <textarea id="description" name="description" rows="4">{{ book['description'] }}</textarea>
 
-                <!-- <label for="image_upload">Upload New Image (optional)</label>
+                <label for="image_upload">Upload New Image (optional)</label>
                 <input type="file" id="image_upload" name="image_upload" onchange="readURL(this)">
-                <p>Current image: <img src="{{ url_for('static', filename=book['image']) }}" alt="Current Image" width="100"></p> -->
+                <p>Current image: <img src="{{ url_for('static', filename=book['image']) }}" alt="Current Image" width="100"></p>
 
                 <div class="addbook_button_group">
                     <a href="{{ url_for('books', book_id=book['book_id']) }}" class="back_button">Cancel</a>
