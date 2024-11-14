@@ -620,6 +620,23 @@ def reader_profile():
         
         if user:
             user_data = user[0]
+            
+            # Fetch the book history for this reader
+            sql_history = """
+                SELECT books.book_title 
+                FROM requests
+                JOIN books ON requests.book_id = books.book_id
+                WHERE requests.user_id = ?
+            """
+            history = getprocess(sql_history, (user_id,))
+            
+            # Convert the fetched history to a list of book titles
+            book_history = [h['book_title'] for h in history]
+            
+            # Add the book history to the user data
+            user_data = dict(user_data)  # Convert sqlite3.Row to a dictionary (modifiable)
+            user_data['history'] = book_history
+
             return render_template("reader_profile.html", user=user_data)
         else:
             print("User not found.")
@@ -627,7 +644,6 @@ def reader_profile():
     else:
         flash("You do not have permission to view this page.")
         return redirect(url_for("login"))
-    
 
 #READER'S WISHLIST
 @app.route("/wishlist")

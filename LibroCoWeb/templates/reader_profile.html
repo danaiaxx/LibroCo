@@ -7,31 +7,29 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylereaderdash.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profilestyles.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
-    <title> Profile | LibroCo </title>
+    <title>Profile | LibroCo</title>
 </head>
 
 <body>
     <nav>
         <a class="navbar-brand" href="{{ url_for('library') }}">
-            <img class="logo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50"
-                alt="LibroCo. Logo">
+            <img class="logo" src="{{ url_for('static', filename='images/logo.png') }}" width="250" height="50" alt="LibroCo. Logo">
         </a>
         <div class="separator"></div>
         <div class="navbar-links">
-            <a href="{{ url_for('library') }}"> Library </a>
-            <a href="{{ url_for('my_books') }}"> My Books </a>
-            <a href="{{ url_for('wishlist') }}"> Wishlist </a>
+            <a href="{{ url_for('library') }}">Library</a>
+            <a href="{{ url_for('my_books') }}">My Books</a>
+            <a href="{{ url_for('wishlist') }}">Wishlist</a>
         </div>
         <div class="navbar-right">
-            <a href="{{ url_for('reader_profile') }}" class="active"> Profile </a>
-            <a href="{{ url_for('logout') }}"> Log Out </a>
+            <a href="{{ url_for('reader_profile') }}" class="active">Profile</a>
+            <a href="{{ url_for('logout') }}">Log Out</a>
         </div>
     </nav>
 
     <div class="main-content">
         <div class="profile_container">
             <div class="profile_image">
-                <!-- Check if the user is a reader or librarian and show their profile image accordingly -->
                 <img src="{{ url_for('static', filename='images/' + (user['user_image'] if user['user_image'] else 'default_profile.png')) }}">
             </div>
             <div class="profile_details">
@@ -44,6 +42,20 @@
                     <button class="edit_button">Edit</button>
                 </a>
             </div>
+        </div>
+
+        <!-- Book History Section -->
+        <div class="book_history">
+            <h3 class="book_history_header">Book History</h3>
+            <ol class="book_list">
+                {% if user['history'] %}
+                    {% for book in user['history'] %}
+                        <li>{{ book }}</li>
+                    {% endfor %}
+                {% else %}
+                    <li>No book history available.</li>
+                {% endif %}
+            </ol>
         </div>
     </div>
 </body>
