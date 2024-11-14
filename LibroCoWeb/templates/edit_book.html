@@ -7,11 +7,69 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/addbookStyles.css') }}">
     <link rel="icon" type="logo/icon" href="static/images/favicon.ico">
     <title>Edit Book | LibroCo.</title>
+    <style>
+        .book_image {
+            width: 290px;
+            max-height: 700px;
+            margin-bottom: 150px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center; /* Center image horizontally */
+            align-items: center; /* Center image vertically */
+            background-color: #f0f0f0; /* Light background */
+        }
+
+        .book_image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Prevent image from stretching, maintain aspect ratio */
+            display: block;
+        }
+
+        .overlay_wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .image_overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .upload {
+            width: 3rem;
+            height: 3rem;
+            object-fit: contain;
+            display: block;
+        }
+
+        .image_overlay span {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+    </style>
 </head>
 <body>
     <nav>
         <a class="navbar-brand" href="books.html">
-            <img src="static/images/logo.png" width="250" height="50" />
+            <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo" width="250" height="50" />
         </a>
 
         <div class="separator"></div>
@@ -22,46 +80,55 @@
             <a href="{{ url_for('readers') }}">Readers</a>
         </div>
 
-        <div class="navbar-right">
+        <div class="navbar-rightt">
             <a href="{{ url_for('profile') }}">Profile</a>
             <a href="{{ url_for('login') }}">Log Out</a>
         </div>
     </nav>
-    <div class="divider"></div> <!-- Line divider -->
-    
-    <div class="addbook_container">
-        <!-- This div is used to display the image -->
-        <div class="book_image">
-            <div class="overlay_wrapper">
-                <label for="image_upload">
-                    <div class="image_overlay">
-                        <img src="static/images/upload_photo.png" class="upload" />
-                    </div>
-                    <img id="image" src="static/images/blank_image.png">
-                    
-                </label>
-            </div>
-        </div>
 
-        <form class="addbook_form" action="{{ url_for('edit_book', book_id=book['book_id']) }}" method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <h1>Edit Book - {{ book['book_title'] }}</h1>
-                <label for="book_title">Title</label>
-                <input type="text" id="book_title" name="book_title" value="{{ book['book_title'] }}" required>
-            </div>
-            <div class="side_by_side">
-                <div>
-                    <label for="author">Author</label>
-                    <input type="text" id="author" name="author" value="{{ book['author'] }}" required>
+    <div class="divider"></div> <!-- Line divider -->
+
+    <!-- Main container that wraps the form and image -->
+    <div class="main_container">
+        <div class="addbook_container">
+            <!-- Book Image Section -->
+            <div class="book_image">
+                <div class="overlay_wrapper">
+                    <label for="image_upload">
+                        <div class="image_overlay">
+                            <img src="{{ url_for('static', filename='images/upload_photo.png') }}" class="upload" />
+                            <span>Click to upload</span>
+                        </div>
+                    </label>
+                    <input type="file" id="image_upload" name="image" onchange="readURL(this);">
+                    <img id="image" src="{{ url_for('static', filename='images/blank_image.png') }}" alt="Book Image">
                 </div>
-                <div>
-                    <label for="publication_year">Publication Year</label>
-                    <input type="number" id="publication_year" name="publication_year" value="{{ book['publication_year'] }}">
-                </div>
             </div>
+
+            <!-- Form to edit book details -->
+            <form class="addbook_form" action="{{ url_for('edit_book', book_id=book['book_id']) }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <h1>Edit Book - {{ book['book_title'] }}</h1>
+                    <label for="book_title">Title</label>
+                    <input type="text" id="book_title" name="book_title" value="{{ book['book_title'] }}" required>
+                </div>
+                
+                <!-- Author and Publication Year Fields (Side by side) -->
+                <div class="side_by_side">
+                    <div>
+                        <label for="author">Author</label>
+                        <input type="text" id="author" name="author" value="{{ book['author'] }}" required>
+                    </div>
+                    <div>
+                        <label for="publication_year">Publication Year</label>
+                        <input type="number" id="publication_year" name="publication_year" value="{{ book['publication_year'] }}">
+                    </div>
+                </div>
+
+                <!-- Genre Field -->
                 <label for="genre">Genre</label>
-                <select id="genre" name="genre" value="{{ book['genre'] }}">
-                    <option value=""></option>
+                <select id="genre" name="genre">
+                    <option value="{{ book['genre'] }}" selected>{{ book['genre'] }}</option>
                     <option value="fiction">Fiction</option>
                     <option value="non-fiction">Non-fiction</option>
                     <option value="romance">Romance</option>
@@ -69,19 +136,19 @@
                     <option value="horror-thriller">Horror/Thriller</option>
                 </select>
 
+                <!-- Description Field -->
                 <label for="description">Description</label>
                 <textarea id="description" name="description" rows="4">{{ book['description'] }}</textarea>
 
-                <!-- <label for="image_upload">Upload New Image (optional)</label>
-                <input type="file" id="image_upload" name="image_upload" onchange="readURL(this)">
-                <p>Current image: <img src="{{ url_for('static', filename=book['image']) }}" alt="Current Image" width="100"></p> -->
-
                 <div class="addbook_button_group">
+                    <!-- Cancel and Save buttons -->
                     <a href="{{ url_for('books', book_id=book['book_id']) }}" class="back_button">Cancel</a>
                     <button type="submit" class="save_button">Save Changes</button>
                 </div>
-        </form>
+            </form>
+        </div>
     </div>
+
     <script>
         function readURL(input) {
             if (input.files && input.files[0]) {
