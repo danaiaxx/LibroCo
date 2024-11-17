@@ -321,6 +321,46 @@ def view_book_details(book_id):
         flash("Book not found.", "error")
         return redirect(url_for("books"))
     
+
+# LIBRARIAN VIEW BOOKKKKKKKKKKKKKKKKKKKKKKK
+
+# @app.route("/lib_viewbook/<int:book_id>")
+# def lib_viewbook(book_id):
+#     book = get_book_by_id(book_id)  # Fetch book details using the modified function
+#     if book:
+#         return render_template("lib_viewbook.html", book=book)
+#     else:
+#         flash("Book not found.", "error")
+#         return redirect(url_for("books"))
+
+
+# def get_book_by_id(book_id):
+#     """Query the database to fetch book details by its ID."""
+#     conn = sqlite3.connect('libroco.db')
+#     conn.row_factory = sqlite3.Row  # This allows access by column name
+#     cursor = conn.cursor()
+    
+#     # Query the books table to get the book data
+#     cursor.execute("SELECT book_id, book_title, author, description, image FROM books WHERE book_id = ?", (book_id,))
+#     book = cursor.fetchone()  # Fetch the first result as a dictionary-like object
+    
+#     conn.close()
+    
+#     if book:
+#         return dict(book)  # Convert Row object to dictionary
+#     else:
+#         return None  # Return None if no book is found
+
+@app.route('/book/<int:book_id>')
+def show_book(book_id):
+    """Render the book details page."""
+    book = get_book_by_id(book_id)
+    
+    if book:
+        return render_template('book_details.html', book=book)
+    else:
+        return "Book not found", 404
+    
 #Librarian Edit Book
 # Route to edit book information
 @app.route('/book/edit/<int:book_id>', methods=['GET', 'POST'])
