@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/mainstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/addbookStyles.css') }}">
-    <link rel="icon" type="logo/icon" href="static/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <title>Edit Book | LibroCo.</title>
     <style>
         .book_image {
@@ -99,7 +99,6 @@
                     <label for="image_upload">
                         <div class="image_overlay">
                             <img src="{{ url_for('static', filename='images/upload_photo.png') }}" class="upload" />
-                            <span>Click to upload</span>
                         </div>
                     </label>
                     <input type="file" id="image_upload" name="image" onchange="readURL(this);">

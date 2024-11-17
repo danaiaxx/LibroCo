@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/mainstyle.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/editprofilestyles.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <title> Edit Profile | LibroCo. </title>
@@ -29,14 +30,20 @@
 
     <div class="profile_editcontainer">
         <div class="profile_image">
-            <div class="overlay_wrapper">
-                <img src="{{ url_for('static', filename='images/' + (user['profile_image'] if user['profile_image'] else 'default_profile.png')) }}" class="responsive_image">
-                <div class="image_overlay">
-                    <img src="{{ url_for('static', filename='images/upload_photo.png') }}" class="upload">
+            <!-- Make the profile image clickable -->
+            <label for="user_image">
+                <div class="overlay_wrapper">
+                    <!-- Display the profile image or default if none is set -->
+                    <img src="{{ url_for('static', filename='images/' + (user['profile_image'] if user['profile_image'] else 'default_profile.png')) }}" id="profile_image_preview" class="responsive_image">
+                    <div class="image_overlay">
+                        <img src="{{ url_for('static', filename='images/upload_photo.png') }}" class="upload">
+                    </div>
                 </div>
-            </div>
+            </label>
+            <!-- Hidden file input for profile image upload -->
+            <input type="file" name="user_image" id="user_image" style="display:none;" onchange="readURL(this)">
         </div>
-        <form class="profile_form" method="POST" action="{{ url_for('save_profile') }}">
+        <form class="profile_form" method="POST" action="{{ url_for('edit_profile') }}">
             <label for="full_name">Full Name</label>
             <input type="text" id="full_name" name="full_name" value="{{ user['full_name'] }}">
 
@@ -55,6 +62,20 @@
             </div>
         </form>
     </div>
+
+    <script>
+        // Function to preview the uploaded image
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    // Update the profile image preview with the selected image
+                    document.getElementById('profile_image_preview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 
 </body>
 

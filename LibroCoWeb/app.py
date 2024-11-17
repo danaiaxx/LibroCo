@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from dbhelper import *
+from werkzeug.utils import secure_filename
 import os
 import random
 import sqlite3
@@ -228,7 +229,6 @@ def reset_pass():
 @app.route("/books")
 def books() -> None:
     if 'user_id' not in session:
-        flash("Please log in first.")
         return redirect(url_for("login"))
     
     user_id = session.get('user_id')
@@ -473,7 +473,6 @@ def update_reader():
 def profile():
     print("Session data in profile route:", session)  # Debugging print
     if 'user_id' not in session:
-        flash("Please log in first.")
         return redirect(url_for("login"))
     
     user_id = session.get('user_id')
@@ -493,7 +492,6 @@ def profile():
             user_data = user[0]
             return render_template("profile.html", user=user_data)
         else:
-            print("User not found.")
             return redirect(url_for("login"))
     else:
         flash("You do not have permission to view this page.")
@@ -504,19 +502,106 @@ def before_request():
     print("Session data:", session)
 
 
-#EDIT LIBRARIAN PROFILE
-@app.route("/edit_profile")
+@app.route("/edit_profile", methods=["GET", "POST"])
 def edit_profile():
-    user_id = request.args.get('id', 1, type=int) 
-    sql = "SELECT user_full_name, user_email, user_contact, profile_image FROM users WHERE user_id = ?"
-    user = getprocess(sql, (user_id,))
-    
-    if user:
-        user_data = user[0]
+    # Ensure user is logged in
+    if 'user_id' not in session:
+        flash("Please log in first.")
+        return redirect(url_for("login"))
+
+    user_id = session['user_id']
+
+    # Check if the user has permission to edit (assuming user_id == 1 is admin)
+    if user_id != 1:
+        flash("You do not have permission to edit this profile.")
+        return redirect(url_for("profile"))
+
+    if request.method == "POST":
+        full_name = request.form.get("full_name")
+        contact = request.form.get("contact")
+        email = request.form.get("email")
+        
+        user_image = None
+        if 'user_image' in request.files:
+            file = request.files['user_image']
+            print(file)  # Debugging line: Check the file object
+            if file:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join('static/images', filename)
+                print("Saving file to:", file_path)  # Debugging line: Check the file path
+                file.save(file_path)
+                user_image = filename
+
+        # Update user details in the 'users' table
+        sql_update_user = """
+            UPDATE users
+            SET user_name = ?, user_contact = ?, user_email = ?
+            WHERE user_id = ?
+        """
+        result = postprocess(sql_update_user, (full_name, contact, email, user_id))
+
+        # If a new profile image is uploaded, insert/update in 'profileimages' table
+        if user_image:
+            # First, check if the user already has an image in the profileimages table
+            sql_check_image = """
+                SELECT * FROM profileimages WHERE user_id = ?
+            """
+            existing_image = getprocess(sql_check_image, (user_id,))
+            print("Existing image:", existing_image)  # Debugging line: Check the existing image query result
+
+            if existing_image:
+                # If user already has a profile image, update it
+                sql_update_image = """
+                    UPDATE profileimages
+                    SET user_image = ?
+                    WHERE user_id = ?
+                """
+                update_result = postprocess(sql_update_image, (user_image, user_id))
+                if update_result:
+                    print("Image updated successfully!")
+                else:
+                    print("Error updating image.")
+            else:
+                # If user does not have a profile image, insert a new record
+                sql_insert_image = """
+                    INSERT INTO profileimages (user_id, user_image)
+                    VALUES (?, ?)
+                """
+                insert_result = postprocess(sql_insert_image, (user_id, user_image))
+                if insert_result:
+                    print("Image inserted successfully!")
+                else:
+                    print("Error inserting image.")
+
+        # Show success or error message based on result
+        if result:
+            flash("Profile updated successfully.")
+        else:
+            flash("An error occurred while updating the profile.")
+
+        return redirect(url_for("profile"))
+
+    # Get user data to populate form for GET request
+    sql = """
+        SELECT u.user_name, u.user_email, u.user_contact, p.user_image
+        FROM users u
+        LEFT JOIN profileimages p ON u.user_id = p.user_id
+        WHERE u.user_id = ?
+    """
+    user_data = getprocess(sql, (user_id,))
+
+    if user_data:
+        user = user_data[0]
+        user_data = {
+            "full_name": user["user_name"],
+            "email": user["user_email"],
+            "contact": user["user_contact"],
+            "user_image": user["user_image"] if user["user_image"] else 'default_profile.png'
+        }
         return render_template("editprofile.html", user=user_data)
     else:
-        flash("User not found")
-        return redirect(url_for("login"))
+        flash("Error loading profile.")
+        return redirect(url_for("profile"))
 
 #LOGOUT
 @app.route("/logout", methods=['GET'])
@@ -542,7 +627,6 @@ def index():
 @app.route("/library")
 def library():
     if 'user_id' not in session:
-        flash("Please log in first.")
         return redirect(url_for("login"))
 
     user_id = session.get('user_id')
@@ -603,38 +687,62 @@ def my_books():
 def reader_profile():
     print("Session data in reader profile route:", session)  # Debugging print
     if 'user_id' not in session:
-        flash("Please log in first.")
         return redirect(url_for("login"))
-    
+
     user_id = session.get('user_id')
-    
+
     # Check if the logged-in user is not the librarian (user_id != 1)
     if user_id != 1:
         # Fetch the reader's profile information, including the image from the profileimages table
-        sql = """
+        sql_user = """
         SELECT u.user_name, u.user_email, u.user_contact, p.user_image
         FROM users u
         LEFT JOIN profileimages p ON u.user_id = p.user_id
         WHERE u.user_id = ?
         """
-        user = getprocess(sql, (user_id,))
-        
+        user = getprocess(sql_user, (user_id,))
+
         if user:
             user_data = user[0]
-            return render_template("reader_profile.html", user=user_data)
+
+            # Fetch the reader's borrowing history
+            sql_history = """
+            SELECT books.book_title, books.author, books.genre, requests.request_date
+            FROM requests
+            JOIN books ON requests.book_id = books.book_id
+            WHERE requests.user_id = ?
+            """
+            history = getprocess(sql_history, (user_id,))
+
+            # Format the borrowing history data
+            book_history = [
+                {
+                    "title": record['book_title'],
+                    "author": record['author'],
+                    "genre": record['genre'],
+                    "date": record['request_date']
+                }
+                for record in history
+            ]
+
+            # Pass both user details and borrowing history to the template
+            return render_template(
+                "reader_profile.html",
+                user=user_data,
+                book_history=book_history
+            )
         else:
-            print("User not found.")
             return redirect(url_for("login"))
     else:
         flash("You do not have permission to view this page.")
         return redirect(url_for("login"))
+
     
 
 #READER'S WISHLIST
 @app.route("/wishlist")
 def wishlist():
     if 'user_id' not in session:
-        flash("Please log in first.")
         return redirect(url_for("login"))
     
     user_id = session.get('user_id') 
@@ -652,7 +760,6 @@ def wishlist():
 @app.route("/add_to_wishlist/<int:book_id>")
 def add_to_wishlist(book_id):
     if 'user_id' not in session:
-        flash("Please log in first.")
         return redirect(url_for("login"))
     
     user_id = session.get('user_id')
@@ -672,7 +779,6 @@ def add_to_wishlist(book_id):
 @app.route("/remove_from_wishlist/<int:book_id>")
 def remove_from_wishlist(book_id):
     if 'user_id' not in session:
-        flash("Please log in first.")
         return redirect(url_for("login"))
     
     user_id = session.get('user_id')

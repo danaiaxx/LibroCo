@@ -30,7 +30,7 @@
     <div class="main-content">
         <div class="profile_container">
             <div class="profile_image">
-                <img src="{{ url_for('static', filename='images/' + (user['user_image'] if user['user_image'] else 'default_profile.png')) }}">
+                <img src="{{ url_for('static', filename='images/' + (user['user_image'] if user['user_image'] else 'default_profile.png')) }}" alt="Profile Picture">
             </div>
             <div class="profile_details">
                 <h3 class="name">{{ user['user_name'] }}</h3>
@@ -48,9 +48,11 @@
         <div class="book_history">
             <h3 class="book_history_header">Book History</h3>
             <ol class="book_list">
-                {% if user['history'] %}
-                    {% for book in user['history'] %}
-                        <li>{{ book }}</li>
+                {% if book_history %}
+                    {% for book in book_history %}
+                        <li>
+                            {{ book.title }}
+                        </li>
                     {% endfor %}
                 {% else %}
                     <li>No book history available.</li>
