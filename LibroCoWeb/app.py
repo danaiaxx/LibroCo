@@ -262,17 +262,50 @@ def addbook():
     return render_template("addbook.html")
 
 #SAVE BOOK
-@app.route("/savebook", methods=['GET', 'POST'])
-def savebook()-> None:
-    if not os.path.exists(uploadfolder):
-        os.makedirs(uploadfolder)
+# @app.route("/savebook", methods=['GET', 'POST'])
+# def savebook()-> None:
+#     if not os.path.exists(uploadfolder):
+#         os.makedirs(uploadfolder)
     
-    book_title = request.form['book_title']
-    author = request.form['author']
-    publication_year = request.form['publication_year']
-    genre = request.form['genre']
-    description = request.form['description']
+#     book_title = request.form['book_title']
+#     author = request.form['author']
+#     publication_year = request.form['publication_year']
+#     genre = request.form['genre']
+#     description = request.form['description']
 
+#     file = request.files['image_upload']
+#     if file:
+#         filename = os.path.join(uploadfolder, file.filename)
+#         file.save(filename)
+#     else:
+#         filename = 'static/images/blank_image.png'
+
+#     sql = '''INSERT INTO books (book_title, author, publication_year, genre, description, image) 
+#              VALUES (?, ?, ?, ?, ?, ?)'''
+#     params = (book_title, author, publication_year, genre, description, filename)
+#     ok = postprocess(sql, params)
+    
+#     if ok:
+#         flash("Registration Successful")
+#     else:
+#         flash("Registration Failed")
+    
+#     return redirect("/books")
+@app.route("/savebook", methods=["POST"])
+def savebook():
+    # Ensure that the librarian is logged in
+    if 'user_id' not in session or session.get('user_id') != 1:
+        flash("You must be logged in as a librarian to add books.")
+        return redirect(url_for("login"))
+
+    # Get the book details from the form
+    book_title = request.form.get("book_title")
+    author = request.form.get("author")
+    publication_year = request.form.get("publication_year")
+    genre = request.form.get("genre")
+    description = request.form.get("description")
+    
+    # Handle the image upload
     file = request.files['image_upload']
     if file:
         filename = os.path.join(uploadfolder, file.filename)
@@ -280,17 +313,39 @@ def savebook()-> None:
     else:
         filename = 'static/images/blank_image.png'
 
-    sql = '''INSERT INTO books (book_title, author, publication_year, genre, description, image) 
-             VALUES (?, ?, ?, ?, ?, ?)'''
-    params = (book_title, author, publication_year, genre, description, filename)
-    ok = postprocess(sql, params)
-    
-    if ok:
-        flash("Registration Successful")
+    # Insert the book into the "books" table
+    sql_insert_book = """
+    INSERT INTO books (book_title, author, publication_year, genre, description, image)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """
+    result = postprocess(sql_insert_book, (book_title, author, publication_year, genre, description, filename))
+
+    if result:
+        # Retrieve the latest book_id from the books table
+        sql_get_last_book_id = "SELECT MAX(book_id) FROM books"
+        last_book_id_result = getprocess(sql_get_last_book_id)
+
+        if last_book_id_result:
+            last_book_id = last_book_id_result[0]["MAX(book_id)"]
+            new_book_id = last_book_id  # Increment to get the new book_id
+
+            # Insert the status for the new book in the "status" table (set availability to 'Available')
+            sql_insert_status = """
+            INSERT INTO status (book_id, availability)
+            VALUES (?, ?)
+            """
+            postprocess(sql_insert_status, (new_book_id, 'Available'))
+
+            flash(f"The book '{book_title}' has been added successfully and is available for borrowing.")
+            return redirect(url_for("library"))  # Redirect to the library or other page as needed
+        else:
+            flash("Failed to retrieve the last book_id.")
+            return redirect(url_for("add_book"))  # Redirect to the add book page if there was an error
     else:
-        flash("Registration Failed")
-    
-    return redirect("/books")
+        flash("An error occurred while adding the book.")
+        return redirect(url_for("add_book"))  # Redirect to the add book page if there was an error
+
+
 
 #Librarian View Book
 @app.route("/lib_viewbook/<int:book_id>")
@@ -323,33 +378,6 @@ def view_book_details(book_id):
     
 
 # LIBRARIAN VIEW BOOKKKKKKKKKKKKKKKKKKKKKKK
-
-# @app.route("/lib_viewbook/<int:book_id>")
-# def lib_viewbook(book_id):
-#     book = get_book_by_id(book_id)  # Fetch book details using the modified function
-#     if book:
-#         return render_template("lib_viewbook.html", book=book)
-#     else:
-#         flash("Book not found.", "error")
-#         return redirect(url_for("books"))
-
-
-# def get_book_by_id(book_id):
-#     """Query the database to fetch book details by its ID."""
-#     conn = sqlite3.connect('libroco.db')
-#     conn.row_factory = sqlite3.Row  # This allows access by column name
-#     cursor = conn.cursor()
-    
-#     # Query the books table to get the book data
-#     cursor.execute("SELECT book_id, book_title, author, description, image FROM books WHERE book_id = ?", (book_id,))
-#     book = cursor.fetchone()  # Fetch the first result as a dictionary-like object
-    
-#     conn.close()
-    
-#     if book:
-#         return dict(book)  # Convert Row object to dictionary
-#     else:
-#         return None  # Return None if no book is found
 
 @app.route('/book/<int:book_id>')
 def show_book(book_id):
@@ -721,7 +749,22 @@ def book2(book_id):
 #READER'S BORROWED BOOKS
 @app.route("/my_books")
 def my_books():
-    return render_template("my_books.html")
+    if 'user_id' not in session:
+        return redirect(url_for("login"))
+    
+    user_id = session.get('user_id')
+
+    # Get borrowed books
+    sql_borrowed_books = """
+    SELECT b.book_title, b.author, b.genre, r.request_date
+    FROM requests r
+    JOIN books b ON r.book_id = b.book_id
+    WHERE r.user_id = ? AND r.returned_date IS NULL
+    """
+    borrowed_books = getprocess(sql_borrowed_books, (user_id,))
+
+    return render_template("my_books.html", borrowed_books=borrowed_books)
+
 
 @app.route("/reader_profile")
 def reader_profile():
@@ -777,7 +820,6 @@ def reader_profile():
         flash("You do not have permission to view this page.")
         return redirect(url_for("login"))
 
-    
 
 #READER'S WISHLIST
 @app.route("/wishlist")
