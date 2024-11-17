@@ -8,6 +8,21 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/viewbookstyle.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <title>View Book | LibroCo.</title>
+    <style>
+        /* Custom styling for the availability status */
+        .status.available {
+            color: green;
+        }
+
+        .status.unavailable {
+            color: red;
+        }
+
+        .borrow_button.disabled {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 
 <body>
@@ -46,7 +61,13 @@
                     <h5 class="author"><strong>Author:</strong> {{ book['author'] }}</h5>
                     <h5 class="publication_year"><strong>Year:</strong> {{ book['publication_year'] }}</h5>
                     <h5 class="genre">Genre: <span class="genre_details">{{ book['genre'] }}</span></h5>
-                    <h5 class="availability">Availability: <span class="status">{{ book['availability'] }}</span></h5>
+
+                    <!-- Change the color based on availability -->
+                    <h5 class="availability">Status: 
+                        <span class="status {{ 'available' if availability == 'Available' else 'unavailable' }}">
+                            {{ availability }}
+                        </span>
+                    </h5>
 
                     <div class="description">{{ book['description'] }}</div>
 
@@ -57,41 +78,20 @@
                         <a href="{{ url_for('wishlist') }}">
                             <button type="button" class="addwishlist_button">Add To Wishlist</button>
                         </a>
-                        <!-- view_book.html for reader -->
-                        <form action="{{ url_for('borrow') }}" method="POST">
-                                <input type="hidden" name="book_id" value="{{ book['book_id'] }}">
-                                <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
-                                <button type="submit" class="borrow_button">Borrow</button>
+
+                        <!-- Disable the borrow button if unavailable -->
+                        <form action="{{ url_for('borrow') }}" method="post">
+                            <input type="hidden" name="book_id" value="{{ book['book_id'] }}">
+                            <button type="submit" class="borrow_button {{ 'disabled' if availability == 'Unavailable' else '' }}" 
+                                    {% if availability == 'Unavailable' %} disabled {% endif %}>
+                                Borrow
+                            </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const borrowButton = document.querySelector(".borrow_button");
-            const wishlistButton = document.querySelector(".addwishlist_button");
-
-            borrowButton.addEventListener("click", function () {
-                const isAvailable = document.querySelector(".status").textContent.trim() === "Available";
-                if (isAvailable) {
-                    // Simulate borrow action
-                    alert("You have successfully borrowed the book!");
-                    document.querySelector(".status").textContent = "Unavailable"; // Update status
-                    borrowButton.disabled = true;
-                } else {
-                    alert("Sorry, this book is currently unavailable.");
-                }
-            });
-
-            wishlistButton.addEventListener("click", function () {
-                // Simulate adding to wishlist
-                alert("Book added to your wishlist!");
-            });
-        });
-    </script>
 </body>
 
 </html>

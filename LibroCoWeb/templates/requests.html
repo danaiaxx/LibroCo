@@ -43,20 +43,20 @@
             </tr>
             {% for request in requests %}
                 <tr>
-                    <td>{{ request[0] }}</td> <!-- Book Title -->
-                    <td>{{ request[1] }}</td> <!-- Author -->
-                    <td>{{ request[2] }}</td> <!-- Genre -->
+                    <td>{{ request.book_title }}</td> <!-- Book Title -->
+                    <td>{{ request.author }}</td> <!-- Author -->
+                    <td>{{ request.genre }}</td> <!-- Genre -->
                     <td class="status">
-                        {% if request[3] == 'Available' %}
+                        {% if request.availability == 'Available' %}
                             <span class="available">Available</span>
                         {% else %}
                             <span class="unavailable">Unavailable</span>
                         {% endif %}
                     </td>
-                    <td>{{ request[4] }}</td> <!-- Requested By -->
+                    <td>{{ request.user_name }}</td> <!-- Requested By -->
                     <td class="action-cell">
                         <form action="{{ url_for('approve_request') }}" method="post">
-                            <input type="hidden" name="request_id" value="{{ request[5] }}">
+                            <input type="hidden" name="request_id" value="{{ request.request_id }}">
                             <button class="approve-btn">
                                 <img src="{{ url_for('static', filename='images/tsek.png') }}" class="tsek" alt="Approve">
                             </button>
@@ -64,7 +64,7 @@
                     </td>
                     <td class="action-cell">
                         <form action="{{ url_for('decline_request') }}" method="post">
-                            <input type="hidden" name="request_id" value="{{ request[5] }}">
+                            <input type="hidden" name="request_id" value="{{ request.request_id }}">
                             <button class="decline-btn">
                                 <img src="{{ url_for('static', filename='images/eks.png') }}" class="eks" alt="Decline">
                             </button>

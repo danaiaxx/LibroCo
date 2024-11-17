@@ -444,35 +444,66 @@ def list_books():
     return render_template('list_books.html', books=books)
 
 # KEVIN READER BORROW BOOK REQUEST
+# @app.route("/borrow", methods=["POST"])
+# def borrow():
+#     # Ensure the user (reader) is logged in
+#     if 'user_id' not in session:
+#         flash("You must be logged in to borrow a book.")
+#         return redirect(url_for("login"))
+
+#     # Get the book ID and user ID from the form submission
+#     book_id = request.form.get("book_id")
+#     user_id = request.form.get("user_id")
+
+#     # Check if the book is available
+#     sql_check_availability = "SELECT availability FROM status WHERE book_id = ?"
+#     availability = getprocess(sql_check_availability, (book_id,))
+
+#     if availability and availability[0]["availability"] == "Available":
+#         # Insert the borrow request into the "requests" table
+#         sql_insert_request = """
+#         INSERT INTO requests (user_id, book_id)
+#         VALUES (?, ?)
+#         """
+#         postprocess(sql_insert_request, (user_id, book_id))
+
+#         flash(f"Your request to borrow '{request.form.get('book_title')}' has been submitted to the librarian for approval.")
+#         return redirect(url_for("library"))  # Redirect to the library or another page after the request
+#     else:
+#         flash("Sorry, this book is currently unavailable.")
+#         return redirect(url_for("library"))
 @app.route("/borrow", methods=["POST"])
 def borrow():
-    # Ensure the user (reader) is logged in
     if 'user_id' not in session:
         flash("You must be logged in to borrow a book.")
-        return redirect(url_for("login"))
+        return redirect(url_for('login'))
 
-    # Get the book ID and user ID from the form submission
     book_id = request.form.get("book_id")
-    user_id = request.form.get("user_id")
+    user_id = session.get('user_id')
 
-    # Check if the book is available
+    # Check the availability of the book
     sql_check_availability = "SELECT availability FROM status WHERE book_id = ?"
     availability = getprocess(sql_check_availability, (book_id,))
 
-    if availability and availability[0]["availability"] == "Available":
-        # Insert the borrow request into the "requests" table
+    if availability and availability[0]['availability'] == 'Available':
+        # Insert borrow request into requests table
         sql_insert_request = """
         INSERT INTO requests (user_id, book_id)
         VALUES (?, ?)
         """
-        postprocess(sql_insert_request, (user_id, book_id))
+        result = postprocess(sql_insert_request, (user_id, book_id))
 
-        flash(f"Your request to borrow '{request.form.get('book_title')}' has been submitted to the librarian for approval.")
-        return redirect(url_for("library"))  # Redirect to the library or another page after the request
+        if result:
+            flash("Your borrow request has been submitted to the librarian.")
+            print(f"Request inserted: user_id = {user_id}, book_id = {book_id}")  # Debug log
+            return redirect(url_for("library"))
+        else:
+            flash("There was an issue submitting your request. Please try again.")
+            return redirect(url_for("view_book", book_id=book_id))  # Stay on the same book page
     else:
-        flash("Sorry, this book is currently unavailable.")
-        return redirect(url_for("library"))
-    
+        flash("This book is currently unavailable for borrowing.")
+        return redirect(url_for("view_book", book_id=book_id))  # Stay on the same book page
+   
 
 @app.route("/approve_request", methods=["POST"])
 def approve_request():
@@ -523,7 +554,6 @@ def decline_request():
     flash(f"The request has been declined.")
 
     return redirect(url_for("requests"))
-
 
 @app.route("/requests")
 def requests():
@@ -841,16 +871,22 @@ def library():
         return redirect(url_for("login"))
     
 #READER'S VIEW BOOK    
-@app.route("/viewbook/<int:book_id>")
+@app.route("/view_book/<int:book_id>", methods=["GET"])
 def view_book(book_id):
-    sql = "SELECT * FROM books WHERE book_id = ?"
-    book = getprocess(sql, (book_id,))
+    # Fetch book details from the books table
+    sql_book = "SELECT * FROM books WHERE book_id = ?"
+    book = getprocess(sql_book, (book_id,))
 
-    if book:
-        return render_template("view_book.html", book=book[0])
-    else:
-        flash("Book not found.", "error")
-        return redirect(url_for("books"))
+    # Fetch availability status from the status table
+    sql_status = "SELECT availability FROM status WHERE book_id = ?"
+    status_result = getprocess(sql_status, (book_id,))
+    
+    # If status is found, set availability, else default to 'Unavailable'
+    availability = status_result[0]['availability'] if status_result else 'Unavailable'
+
+    # Pass both book and availability status to the template
+    return render_template("view_book.html", book=book[0], availability=availability)
+
       
 @app.route("/book2/<int:book_id>")
 def book2(book_id):
