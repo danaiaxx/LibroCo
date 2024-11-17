@@ -21,9 +21,11 @@
 }
 
 .delete-button {
+    border: none;
     color: #6F0C0C;
     background-color: #f8f8f8;
     margin-left: -3px;
+    font-size: 18px;
 }
 
 .button:hover {

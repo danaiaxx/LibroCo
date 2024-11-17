@@ -95,6 +95,7 @@ body {
 .book_title {
     font-size: 24px;
     font-weight: bold;
+    margin-top: 0;
 }
 
 .author, .publication_year, .genre, .availability {
@@ -130,7 +131,6 @@ body {
     display: none;
 }
 .editbook_button_group {
-    margin-top: 80px;
     display: flex;
     justify-content: flex-end;
     width: 100%;
