@@ -443,6 +443,110 @@ def list_books():
     books = getall_records("books")
     return render_template('list_books.html', books=books)
 
+# KEVIN READER BORROW BOOK REQUEST
+@app.route("/borrow", methods=["POST"])
+def borrow():
+    # Ensure the user (reader) is logged in
+    if 'user_id' not in session:
+        flash("You must be logged in to borrow a book.")
+        return redirect(url_for("login"))
+
+    # Get the book ID and user ID from the form submission
+    book_id = request.form.get("book_id")
+    user_id = request.form.get("user_id")
+
+    # Check if the book is available
+    sql_check_availability = "SELECT availability FROM status WHERE book_id = ?"
+    availability = getprocess(sql_check_availability, (book_id,))
+
+    if availability and availability[0]["availability"] == "Available":
+        # Insert the borrow request into the "requests" table
+        sql_insert_request = """
+        INSERT INTO requests (user_id, book_id)
+        VALUES (?, ?)
+        """
+        postprocess(sql_insert_request, (user_id, book_id))
+
+        flash(f"Your request to borrow '{request.form.get('book_title')}' has been submitted to the librarian for approval.")
+        return redirect(url_for("library"))  # Redirect to the library or another page after the request
+    else:
+        flash("Sorry, this book is currently unavailable.")
+        return redirect(url_for("library"))
+    
+
+@app.route("/approve_request", methods=["POST"])
+def approve_request():
+    # Ensure the librarian is logged in
+    if 'user_id' not in session or session.get('user_id') != 1:
+        flash("You must be logged in as a librarian to approve requests.")
+        return redirect(url_for("login"))
+
+    # Get the request_id from the form
+    request_id = request.form.get("request_id")
+
+    # Get the request details (user_id, book_id) from the requests table
+    sql_get_request = "SELECT user_id, book_id FROM requests WHERE request_id = ?"
+    request_data = getprocess(sql_get_request, (request_id,))
+
+    if request_data:
+        user_id = request_data[0]["user_id"]
+        book_id = request_data[0]["book_id"]
+
+        # Update the book status to 'Unavailable'
+        sql_update_status = "UPDATE status SET availability = 'Unavailable' WHERE book_id = ?"
+        postprocess(sql_update_status, (book_id,))
+
+        # Optionally: Delete the request from the requests table (since it was handled)
+        sql_delete_request = "DELETE FROM requests WHERE request_id = ?"
+        postprocess(sql_delete_request, (request_id,))
+
+        flash(f"The request for book ID {book_id} has been approved.")
+    else:
+        flash("Request not found.")
+
+    return redirect(url_for("requests"))
+
+@app.route("/decline_request", methods=["POST"])
+def decline_request():
+    # Ensure the librarian is logged in
+    if 'user_id' not in session or session.get('user_id') != 1:
+        flash("You must be logged in as a librarian to decline requests.")
+        return redirect(url_for("login"))
+
+    # Get the request_id from the form
+    request_id = request.form.get("request_id")
+
+    # Delete the request from the requests table
+    sql_delete_request = "DELETE FROM requests WHERE request_id = ?"
+    postprocess(sql_delete_request, (request_id,))
+
+    flash(f"The request has been declined.")
+
+    return redirect(url_for("requests"))
+
+
+@app.route("/requests")
+def requests():
+    # Ensure the librarian is logged in
+    if 'user_id' not in session or session.get('user_id') != 1:
+        flash("You must be logged in as a librarian to view requests.")
+        return redirect(url_for("login"))
+
+    # Get all pending borrow requests (requests that haven't been approved or rejected)
+    sql_get_requests = """
+    SELECT b.book_title, b.author, b.genre, s.availability, u.user_name, r.request_id
+    FROM requests r
+    JOIN books b ON r.book_id = b.book_id
+    JOIN users u ON r.user_id = u.user_id
+    JOIN status s ON b.book_id = s.book_id
+    WHERE s.availability = 'Available'
+    """
+    requests = getprocess(sql_get_requests)
+
+    return render_template("requests.html", requests=requests)
+
+
+
 #REQUESTS PAGE
 def get_requests():
     # Connect to the database
@@ -464,25 +568,38 @@ def get_requests():
     
     return requests
 
-@app.route('/requests')
-def requests():
-    # Get the list of requests
-    requests = get_requests()
-    return render_template('requests.html', requests=requests)
+# @app.route("/requests")
+# def requests():
+#     # Ensure the librarian is logged in
+#     if 'user_id' not in session or session.get('user_id') != 1:
+#         flash("You must be logged in as a librarian to view requests.")
+#         return redirect(url_for("login"))
 
-@app.route('/approve_request', methods=['POST'])
-def approve_request():
-    request_id = request.form['request_id']
-    # Handle approval logic here (e.g., update status to Approved in the database)
-    # Redirect back to the requests page
-    return redirect(url_for('requests'))
+#     # Get all pending borrow requests (requests that haven't been approved or rejected)
+#     sql_get_requests = """
+#     SELECT r.request_id, r.user_id, r.book_id, b.book_title, u.user_name
+#     FROM requests r
+#     JOIN books b ON r.book_id = b.book_id
+#     JOIN users u ON r.user_id = u.user_id
+#     """
+#     requests = getprocess(sql_get_requests)
 
-@app.route('/decline_request', methods=['POST'])
-def decline_request():
-    request_id = request.form['request_id']
-    # Handle decline logic here (e.g., delete or update status to Declined in the database)
-    # Redirect back to the requests page
-    return redirect(url_for('requests'))
+#     return render_template("request.html", requests=requests)
+
+
+# @app.route('/approve_request', methods=['POST'])
+# def approve_request():
+#     request_id = request.form['request_id']
+#     # Handle approval logic here (e.g., update status to Approved in the database)
+#     # Redirect back to the requests page
+#     return redirect(url_for('requests'))
+
+# @app.route('/decline_request', methods=['POST'])
+# def decline_request():
+#     request_id = request.form['request_id']
+#     # Handle decline logic here (e.g., delete or update status to Declined in the database)
+#     # Redirect back to the requests page
+#     return redirect(url_for('requests'))
 
 #READERS PAGE
 @app.route("/readers")

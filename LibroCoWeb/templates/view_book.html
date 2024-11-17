@@ -57,7 +57,12 @@
                         <a href="{{ url_for('wishlist') }}">
                             <button type="button" class="addwishlist_button">Add To Wishlist</button>
                         </a>
-                        <button type="submit" class="borrow_button">Borrow</button>
+                        <!-- view_book.html for reader -->
+                        <form action="{{ url_for('borrow') }}" method="POST">
+                                <input type="hidden" name="book_id" value="{{ book['book_id'] }}">
+                                <input type="hidden" name="user_id" value="{{ session['user_id'] }}">
+                                <button type="submit" class="borrow_button">Borrow</button>
+                        </form>
                     </div>
                 </div>
             </div>
