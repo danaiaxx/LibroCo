@@ -1,14 +1,21 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from dbhelper import *
-from werkzeug.utils import secure_filename
+from flask import send_from_directory
 import os
 import random
 import sqlite3
 import string
 import logging
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Function to check allowed file extensions
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 app = Flask(__name__)
-uploadfolder = "static/images/pictures"
+uploadfolder = "static/images"
+UPLOAD_FOLDER = 'uploads/images/'
 app.config['UPLOAD_FOLDER'] = uploadfolder
 app.secret_key = os.urandom(24) 
 
@@ -262,50 +269,17 @@ def addbook():
     return render_template("addbook.html")
 
 #SAVE BOOK
-# @app.route("/savebook", methods=['GET', 'POST'])
-# def savebook()-> None:
-#     if not os.path.exists(uploadfolder):
-#         os.makedirs(uploadfolder)
+@app.route("/savebook", methods=['GET', 'POST'])
+def savebook()-> None:
+    if not os.path.exists(uploadfolder):
+        os.makedirs(uploadfolder)
     
-#     book_title = request.form['book_title']
-#     author = request.form['author']
-#     publication_year = request.form['publication_year']
-#     genre = request.form['genre']
-#     description = request.form['description']
+    book_title = request.form['book_title']
+    author = request.form['author']
+    publication_year = request.form['publication_year']
+    genre = request.form['genre']
+    description = request.form['description']
 
-#     file = request.files['image_upload']
-#     if file:
-#         filename = os.path.join(uploadfolder, file.filename)
-#         file.save(filename)
-#     else:
-#         filename = 'static/images/blank_image.png'
-
-#     sql = '''INSERT INTO books (book_title, author, publication_year, genre, description, image) 
-#              VALUES (?, ?, ?, ?, ?, ?)'''
-#     params = (book_title, author, publication_year, genre, description, filename)
-#     ok = postprocess(sql, params)
-    
-#     if ok:
-#         flash("Registration Successful")
-#     else:
-#         flash("Registration Failed")
-    
-#     return redirect("/books")
-@app.route("/savebook", methods=["POST"])
-def savebook():
-    # Ensure that the librarian is logged in
-    if 'user_id' not in session or session.get('user_id') != 1:
-        flash("You must be logged in as a librarian to add books.")
-        return redirect(url_for("login"))
-
-    # Get the book details from the form
-    book_title = request.form.get("book_title")
-    author = request.form.get("author")
-    publication_year = request.form.get("publication_year")
-    genre = request.form.get("genre")
-    description = request.form.get("description")
-    
-    # Handle the image upload
     file = request.files['image_upload']
     if file:
         filename = os.path.join(uploadfolder, file.filename)
@@ -313,39 +287,17 @@ def savebook():
     else:
         filename = 'static/images/blank_image.png'
 
-    # Insert the book into the "books" table
-    sql_insert_book = """
-    INSERT INTO books (book_title, author, publication_year, genre, description, image)
-    VALUES (?, ?, ?, ?, ?, ?)
-    """
-    result = postprocess(sql_insert_book, (book_title, author, publication_year, genre, description, filename))
-
-    if result:
-        # Retrieve the latest book_id from the books table
-        sql_get_last_book_id = "SELECT MAX(book_id) FROM books"
-        last_book_id_result = getprocess(sql_get_last_book_id)
-
-        if last_book_id_result:
-            last_book_id = last_book_id_result[0]["MAX(book_id)"]
-            new_book_id = last_book_id  # Increment to get the new book_id
-
-            # Insert the status for the new book in the "status" table (set availability to 'Available')
-            sql_insert_status = """
-            INSERT INTO status (book_id, availability)
-            VALUES (?, ?)
-            """
-            postprocess(sql_insert_status, (new_book_id, 'Available'))
-
-            flash(f"The book '{book_title}' has been added successfully and is available for borrowing.")
-            return redirect(url_for("library"))  # Redirect to the library or other page as needed
-        else:
-            flash("Failed to retrieve the last book_id.")
-            return redirect(url_for("add_book"))  # Redirect to the add book page if there was an error
+    sql = '''INSERT INTO books (book_title, author, publication_year, genre, description, image) 
+             VALUES (?, ?, ?, ?, ?, ?)'''
+    params = (book_title, author, publication_year, genre, description, filename)
+    ok = postprocess(sql, params)
+    
+    if ok:
+        flash("Registration Successful")
     else:
-        flash("An error occurred while adding the book.")
-        return redirect(url_for("add_book"))  # Redirect to the add book page if there was an error
-
-
+        flash("Registration Failed")
+    
+    return redirect("/books")
 
 #Librarian View Book
 @app.route("/lib_viewbook/<int:book_id>")
@@ -375,19 +327,6 @@ def view_book_details(book_id):
     else:
         flash("Book not found.", "error")
         return redirect(url_for("books"))
-    
-
-# LIBRARIAN VIEW BOOKKKKKKKKKKKKKKKKKKKKKKK
-
-@app.route('/book/<int:book_id>')
-def show_book(book_id):
-    """Render the book details page."""
-    book = get_book_by_id(book_id)
-    
-    if book:
-        return render_template('book_details.html', book=book)
-    else:
-        return "Book not found", 404
     
 #Librarian Edit Book
 # Route to edit book information
@@ -443,140 +382,6 @@ def list_books():
     books = getall_records("books")
     return render_template('list_books.html', books=books)
 
-# KEVIN READER BORROW BOOK REQUEST
-# @app.route("/borrow", methods=["POST"])
-# def borrow():
-#     # Ensure the user (reader) is logged in
-#     if 'user_id' not in session:
-#         flash("You must be logged in to borrow a book.")
-#         return redirect(url_for("login"))
-
-#     # Get the book ID and user ID from the form submission
-#     book_id = request.form.get("book_id")
-#     user_id = request.form.get("user_id")
-
-#     # Check if the book is available
-#     sql_check_availability = "SELECT availability FROM status WHERE book_id = ?"
-#     availability = getprocess(sql_check_availability, (book_id,))
-
-#     if availability and availability[0]["availability"] == "Available":
-#         # Insert the borrow request into the "requests" table
-#         sql_insert_request = """
-#         INSERT INTO requests (user_id, book_id)
-#         VALUES (?, ?)
-#         """
-#         postprocess(sql_insert_request, (user_id, book_id))
-
-#         flash(f"Your request to borrow '{request.form.get('book_title')}' has been submitted to the librarian for approval.")
-#         return redirect(url_for("library"))  # Redirect to the library or another page after the request
-#     else:
-#         flash("Sorry, this book is currently unavailable.")
-#         return redirect(url_for("library"))
-@app.route("/borrow", methods=["POST"])
-def borrow():
-    if 'user_id' not in session:
-        flash("You must be logged in to borrow a book.")
-        return redirect(url_for('login'))
-
-    book_id = request.form.get("book_id")
-    user_id = session.get('user_id')
-
-    # Check the availability of the book
-    sql_check_availability = "SELECT availability FROM status WHERE book_id = ?"
-    availability = getprocess(sql_check_availability, (book_id,))
-
-    if availability and availability[0]['availability'] == 'Available':
-        # Insert borrow request into requests table
-        sql_insert_request = """
-        INSERT INTO requests (user_id, book_id)
-        VALUES (?, ?)
-        """
-        result = postprocess(sql_insert_request, (user_id, book_id))
-
-        if result:
-            flash("Your borrow request has been submitted to the librarian.")
-            print(f"Request inserted: user_id = {user_id}, book_id = {book_id}")  # Debug log
-            return redirect(url_for("library"))
-        else:
-            flash("There was an issue submitting your request. Please try again.")
-            return redirect(url_for("view_book", book_id=book_id))  # Stay on the same book page
-    else:
-        flash("This book is currently unavailable for borrowing.")
-        return redirect(url_for("view_book", book_id=book_id))  # Stay on the same book page
-   
-
-@app.route("/approve_request", methods=["POST"])
-def approve_request():
-    # Ensure the librarian is logged in
-    if 'user_id' not in session or session.get('user_id') != 1:
-        flash("You must be logged in as a librarian to approve requests.")
-        return redirect(url_for("login"))
-
-    # Get the request_id from the form
-    request_id = request.form.get("request_id")
-
-    # Get the request details (user_id, book_id) from the requests table
-    sql_get_request = "SELECT user_id, book_id FROM requests WHERE request_id = ?"
-    request_data = getprocess(sql_get_request, (request_id,))
-
-    if request_data:
-        user_id = request_data[0]["user_id"]
-        book_id = request_data[0]["book_id"]
-
-        # Update the book status to 'Unavailable'
-        sql_update_status = "UPDATE status SET availability = 'Unavailable' WHERE book_id = ?"
-        postprocess(sql_update_status, (book_id,))
-
-        # Optionally: Delete the request from the requests table (since it was handled)
-        sql_delete_request = "DELETE FROM requests WHERE request_id = ?"
-        postprocess(sql_delete_request, (request_id,))
-
-        flash(f"The request for book ID {book_id} has been approved.")
-    else:
-        flash("Request not found.")
-
-    return redirect(url_for("requests"))
-
-@app.route("/decline_request", methods=["POST"])
-def decline_request():
-    # Ensure the librarian is logged in
-    if 'user_id' not in session or session.get('user_id') != 1:
-        flash("You must be logged in as a librarian to decline requests.")
-        return redirect(url_for("login"))
-
-    # Get the request_id from the form
-    request_id = request.form.get("request_id")
-
-    # Delete the request from the requests table
-    sql_delete_request = "DELETE FROM requests WHERE request_id = ?"
-    postprocess(sql_delete_request, (request_id,))
-
-    flash(f"The request has been declined.")
-
-    return redirect(url_for("requests"))
-
-@app.route("/requests")
-def requests():
-    # Ensure the librarian is logged in
-    if 'user_id' not in session or session.get('user_id') != 1:
-        flash("You must be logged in as a librarian to view requests.")
-        return redirect(url_for("login"))
-
-    # Get all pending borrow requests (requests that haven't been approved or rejected)
-    sql_get_requests = """
-    SELECT b.book_title, b.author, b.genre, s.availability, u.user_name, r.request_id
-    FROM requests r
-    JOIN books b ON r.book_id = b.book_id
-    JOIN users u ON r.user_id = u.user_id
-    JOIN status s ON b.book_id = s.book_id
-    WHERE s.availability = 'Available'
-    """
-    requests = getprocess(sql_get_requests)
-
-    return render_template("requests.html", requests=requests)
-
-
-
 #REQUESTS PAGE
 def get_requests():
     # Connect to the database
@@ -598,38 +403,30 @@ def get_requests():
     
     return requests
 
-# @app.route("/requests")
-# def requests():
-#     # Ensure the librarian is logged in
-#     if 'user_id' not in session or session.get('user_id') != 1:
-#         flash("You must be logged in as a librarian to view requests.")
-#         return redirect(url_for("login"))
+@app.route('/requests')
+def requests():
+    # Get the list of requests
+    requests = get_requests()
+    return render_template('requests.html', requests=requests)
 
-#     # Get all pending borrow requests (requests that haven't been approved or rejected)
-#     sql_get_requests = """
-#     SELECT r.request_id, r.user_id, r.book_id, b.book_title, u.user_name
-#     FROM requests r
-#     JOIN books b ON r.book_id = b.book_id
-#     JOIN users u ON r.user_id = u.user_id
-#     """
-#     requests = getprocess(sql_get_requests)
+@app.route('/approve_request', methods=['POST'])
+def approve_request():
+    request_id = request.form['request_id']
+    # Handle approval logic here (e.g., update status to Approved in the database)
+    # Redirect back to the requests page
+    return redirect(url_for('requests'))
 
-#     return render_template("request.html", requests=requests)
+@app.route('/decline_request', methods=['POST'])
+def decline_request():
+    request_id = request.form['request_id']
+    # Handle decline logic here (e.g., delete or update status to Declined in the database)
+    # Redirect back to the requests page
+    return redirect(url_for('requests'))
 
-
-# @app.route('/approve_request', methods=['POST'])
-# def approve_request():
-#     request_id = request.form['request_id']
-#     # Handle approval logic here (e.g., update status to Approved in the database)
-#     # Redirect back to the requests page
-#     return redirect(url_for('requests'))
-
-# @app.route('/decline_request', methods=['POST'])
-# def decline_request():
-#     request_id = request.form['request_id']
-#     # Handle decline logic here (e.g., delete or update status to Declined in the database)
-#     # Redirect back to the requests page
-#     return redirect(url_for('requests'))
+@app.route('/uploads/images/<filename>')
+def upload_image(filename):
+    # Ensure the file exists in the 'uploads/images' folder
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 #READERS PAGE
 @app.route("/readers")
@@ -649,17 +446,28 @@ def readers():
         """
         history = getprocess(sql_history, (reader_id,))
 
+        # Ensure that the image is included in the data passed to the template
+        sql_image = """
+            SELECT user_image
+            FROM profileimages
+            WHERE user_id = ?
+        """
+        user_image = getprocess(sql_image, (reader_id,))
+        image_path = user_image[0]['user_image'] if user_image else 'static/images/default_profile.png'
+
         readers_with_history.append({
             "name": reader["user_name"],
             "contact": reader["user_contact"] or "",
             "email": reader["user_email"],
-            "history": [h['book_title'] for h in history]
+            "history": [h['book_title'] for h in history],
+            "user_image": image_path  # Pass the relative image path to the template
         })
 
-    # Sort readers by name in ascending order
     readers_with_history = sorted(readers_with_history, key=lambda x: x['name'].lower())
 
     return render_template("readers.html", readers=readers_with_history)
+
+
 
 #READER'S BOOK HISTORY
 @app.route("/reader_history/<int:user_id>")
@@ -686,109 +494,89 @@ def update_reader():
 #VIEW LIBRARIAN PROFILE
 @app.route("/profile")
 def profile():
-    print("Session data in profile route:", session)  # Debugging print
     if 'user_id' not in session:
         return redirect(url_for("login"))
-    
-    user_id = session.get('user_id')
-    
-    # Check if the logged-in user is the librarian (user_id == 1)
-    if user_id == 1:
-        # Fetch the librarian's profile information, including the image from the profileimages table
-        sql = """
-        SELECT u.user_name, u.user_email, u.user_contact, p.user_image
-        FROM users u
-        LEFT JOIN profileimages p ON u.user_id = p.user_id
-        WHERE u.user_id = ?
-        """
-        user = getprocess(sql, (user_id,))
-        
-        if user:
-            user_data = user[0]
-            return render_template("profile.html", user=user_data)
-        else:
-            return redirect(url_for("login"))
+
+    user_id = session['user_id']
+
+    sql = """
+    SELECT u.user_name, u.user_email, u.user_contact, 
+           COALESCE(p.user_image, 'static/images/default_profile.png') AS user_image
+    FROM users u
+    LEFT JOIN profileimages p ON u.user_id = p.user_id
+    WHERE u.user_id = ?
+    """
+    user = getprocess(sql, (user_id,))
+
+    if user:
+        user_data = dict(user[0])
+        user_data['user_image'] = user_data['user_image'].replace("\\", "/")
+        return render_template("profile.html", user=user_data)
     else:
-        flash("You do not have permission to view this page.")
+        flash("Error loading profile.")
         return redirect(url_for("login"))
 
 @app.before_request
 def before_request():
     print("Session data:", session)
 
-
 @app.route("/edit_profile", methods=["GET", "POST"])
 def edit_profile():
-    # Ensure user is logged in
     if 'user_id' not in session:
         flash("Please log in first.")
         return redirect(url_for("login"))
 
     user_id = session['user_id']
 
-    # Check if the user has permission to edit (assuming user_id == 1 is admin)
     if user_id != 1:
         flash("You do not have permission to edit this profile.")
-        return redirect(url_for("profile"))
+        return redirect(url_for("reader_profile"))
+
+    uploadfolder = os.path.join('static', 'images')
+    if not os.path.exists(uploadfolder):
+        os.makedirs(uploadfolder)
 
     if request.method == "POST":
-        full_name = request.form.get("full_name")
-        contact = request.form.get("contact")
-        email = request.form.get("email")
-        
-        user_image = None
-        if 'user_image' in request.files:
-            file = request.files['user_image']
-            print(file)  # Debugging line: Check the file object
-            if file:
-                filename = secure_filename(file.filename)
-                file_path = os.path.join('static/images', filename)
-                print("Saving file to:", file_path)  # Debugging line: Check the file path
-                file.save(file_path)
-                user_image = filename
+        full_name = request.form['full_name']
+        contact = request.form['contact']
+        email = request.form['email']
 
-        # Update user details in the 'users' table
+        file = request.files.get('user_image')
+        if file:
+            filename = os.path.join(uploadfolder, file.filename)
+            try:
+                file.save(filename)  
+            except Exception as e:
+                flash(f"Error saving the image: {str(e)}")
+                filename = 'static/images/default_profile.png'
+        else:
+            filename = request.form.get('current_image', 'static/images/default_profile.png')
+
         sql_update_user = """
             UPDATE users
             SET user_name = ?, user_contact = ?, user_email = ?
             WHERE user_id = ?
         """
-        result = postprocess(sql_update_user, (full_name, contact, email, user_id))
+        params = (full_name, contact, email, user_id)
+        result = postprocess(sql_update_user, params)
 
-        # If a new profile image is uploaded, insert/update in 'profileimages' table
-        if user_image:
-            # First, check if the user already has an image in the profileimages table
-            sql_check_image = """
-                SELECT * FROM profileimages WHERE user_id = ?
+        check_image_sql = "SELECT * FROM profileimages WHERE user_id = ?"
+        existing_image = getprocess(check_image_sql, (user_id,))
+
+        if existing_image:
+            sql_update_image = """
+                UPDATE profileimages
+                SET user_image = ?
+                WHERE user_id = ?
             """
-            existing_image = getprocess(sql_check_image, (user_id,))
-            print("Existing image:", existing_image)  # Debugging line: Check the existing image query result
+            postprocess(sql_update_image, (filename, user_id))
+        else:
+            sql_insert_image = """
+                INSERT INTO profileimages (user_id, user_image)
+                VALUES (?, ?)
+            """
+            postprocess(sql_insert_image, (user_id, filename))
 
-            if existing_image:
-                # If user already has a profile image, update it
-                sql_update_image = """
-                    UPDATE profileimages
-                    SET user_image = ?
-                    WHERE user_id = ?
-                """
-                update_result = postprocess(sql_update_image, (user_image, user_id))
-                if update_result:
-                    print("Image updated successfully!")
-                else:
-                    print("Error updating image.")
-            else:
-                # If user does not have a profile image, insert a new record
-                sql_insert_image = """
-                    INSERT INTO profileimages (user_id, user_image)
-                    VALUES (?, ?)
-                """
-                insert_result = postprocess(sql_insert_image, (user_id, user_image))
-                if insert_result:
-                    print("Image inserted successfully!")
-                else:
-                    print("Error inserting image.")
-
-        # Show success or error message based on result
         if result:
             flash("Profile updated successfully.")
         else:
@@ -796,7 +584,6 @@ def edit_profile():
 
         return redirect(url_for("profile"))
 
-    # Get user data to populate form for GET request
     sql = """
         SELECT u.user_name, u.user_email, u.user_contact, p.user_image
         FROM users u
@@ -811,12 +598,13 @@ def edit_profile():
             "full_name": user["user_name"],
             "email": user["user_email"],
             "contact": user["user_contact"],
-            "user_image": user["user_image"] if user["user_image"] else 'default_profile.png'
+            "user_image": user["user_image"] if user["user_image"] else 'static/images/default_profile.png'
         }
         return render_template("editprofile.html", user=user_data)
     else:
         flash("Error loading profile.")
         return redirect(url_for("profile"))
+    
 
 #LOGOUT
 @app.route("/logout", methods=['GET'])
@@ -871,22 +659,16 @@ def library():
         return redirect(url_for("login"))
     
 #READER'S VIEW BOOK    
-@app.route("/view_book/<int:book_id>", methods=["GET"])
+@app.route("/viewbook/<int:book_id>")
 def view_book(book_id):
-    # Fetch book details from the books table
-    sql_book = "SELECT * FROM books WHERE book_id = ?"
-    book = getprocess(sql_book, (book_id,))
+    sql = "SELECT * FROM books WHERE book_id = ?"
+    book = getprocess(sql, (book_id,))
 
-    # Fetch availability status from the status table
-    sql_status = "SELECT availability FROM status WHERE book_id = ?"
-    status_result = getprocess(sql_status, (book_id,))
-    
-    # If status is found, set availability, else default to 'Unavailable'
-    availability = status_result[0]['availability'] if status_result else 'Unavailable'
-
-    # Pass both book and availability status to the template
-    return render_template("view_book.html", book=book[0], availability=availability)
-
+    if book:
+        return render_template("view_book.html", book=book[0])
+    else:
+        flash("Book not found.", "error")
+        return redirect(url_for("books"))
       
 @app.route("/book2/<int:book_id>")
 def book2(book_id):
@@ -902,77 +684,143 @@ def book2(book_id):
 #READER'S BORROWED BOOKS
 @app.route("/my_books")
 def my_books():
-    if 'user_id' not in session:
-        return redirect(url_for("login"))
-    
-    user_id = session.get('user_id')
+    return render_template("my_books.html")
 
-    # Get borrowed books
-    sql_borrowed_books = """
-    SELECT b.book_title, b.author, b.genre, r.request_date
-    FROM requests r
-    JOIN books b ON r.book_id = b.book_id
-    WHERE r.user_id = ? AND r.returned_date IS NULL
-    """
-    borrowed_books = getprocess(sql_borrowed_books, (user_id,))
-
-    return render_template("my_books.html", borrowed_books=borrowed_books)
-
-
+#VIEW READER PROFILE
 @app.route("/reader_profile")
 def reader_profile():
-    print("Session data in reader profile route:", session)  # Debugging print
+    print("Session data in reader profile route:", session) 
     if 'user_id' not in session:
         return redirect(url_for("login"))
 
     user_id = session.get('user_id')
 
-    # Check if the logged-in user is not the librarian (user_id != 1)
-    if user_id != 1:
-        # Fetch the reader's profile information, including the image from the profileimages table
-        sql_user = """
+    sql_user = """
+    SELECT u.user_name, u.user_email, u.user_contact, p.user_image
+    FROM users u
+    LEFT JOIN profileimages p ON u.user_id = p.user_id
+    WHERE u.user_id = ?
+    """
+    user = getprocess(sql_user, (user_id,))
+
+    if user:
+        user_data = user[0]
+
+        sql_history = """
+        SELECT books.book_title, books.author, books.genre, requests.request_date
+        FROM requests
+        JOIN books ON requests.book_id = books.book_id
+        WHERE requests.user_id = ?
+        """
+        history = getprocess(sql_history, (user_id,))
+
+        book_history = [
+            {
+                "title": record['book_title'],
+                "author": record['author'],
+                "genre": record['genre'],
+                "date": record['request_date']
+            }
+            for record in history
+        ]
+
+        return render_template(
+            "reader_profile.html",
+            user=user_data,
+            book_history=book_history
+        )
+    else:
+        flash("Profile not found.")
+        return redirect(url_for("login"))
+
+#EDIT READER PROFILE (READER DASHBOARD)
+@app.route("/edit_reader_profile", methods=["GET", "POST"])
+def edit_reader_profile():
+    if 'user_id' not in session:
+        flash("Please log in first.")
+        return redirect(url_for("login"))
+
+    user_id = session['user_id']
+
+    if user_id == 1:
+        flash("Librarians cannot edit reader profiles.")
+        return redirect(url_for("reader_profile"))
+
+    uploadfolder = os.path.join('static', 'images')
+    if not os.path.exists(uploadfolder):
+        os.makedirs(uploadfolder)
+
+    if request.method == "POST":
+        full_name = request.form['full_name']
+        contact = request.form['contact']
+        email = request.form['email']
+        
+        file = request.files.get('user_image')
+        if file:
+            filename = os.path.join(uploadfolder, file.filename)
+            try:
+                file.save(filename)
+                filename = 'images/' + file.filename  # Save only the relative path
+            except Exception as e:
+                flash(f"Error saving the image: {str(e)}")
+                filename = 'images/default_profile.png'
+        else:
+            filename = request.form.get('current_image', 'images/default_profile.png')
+
+                # Store just the filename in the database, not the full path
+        relative_path = filename
+
+        sql_update_user = """
+            UPDATE users
+            SET user_name = ?, user_contact = ?, user_email = ?
+            WHERE user_id = ?
+        """
+        params = (full_name, contact, email, user_id)
+        result = postprocess(sql_update_user, params)
+
+        check_image_sql = "SELECT * FROM profileimages WHERE user_id = ?"
+        existing_image = getprocess(check_image_sql, (user_id,))
+        if existing_image:
+            sql_update_image = """
+                UPDATE profileimages
+                SET user_image = ?
+                WHERE user_id = ?
+            """
+            postprocess(sql_update_image, (relative_path, user_id))
+        else:
+            sql_insert_image = """
+                INSERT INTO profileimages (user_id, user_image)
+                VALUES (?, ?)
+            """
+            postprocess(sql_insert_image, (user_id, relative_path))
+
+        if result:
+            flash("Profile updated successfully.")
+        else:
+            flash("An error occurred while updating the profile.")
+
+        return redirect(url_for("reader_profile"))
+
+    sql = """
         SELECT u.user_name, u.user_email, u.user_contact, p.user_image
         FROM users u
         LEFT JOIN profileimages p ON u.user_id = p.user_id
         WHERE u.user_id = ?
-        """
-        user = getprocess(sql_user, (user_id,))
+    """
+    user_data = getprocess(sql, (user_id,))
 
-        if user:
-            user_data = user[0]
-
-            # Fetch the reader's borrowing history
-            sql_history = """
-            SELECT books.book_title, books.author, books.genre, requests.request_date
-            FROM requests
-            JOIN books ON requests.book_id = books.book_id
-            WHERE requests.user_id = ?
-            """
-            history = getprocess(sql_history, (user_id,))
-
-            # Format the borrowing history data
-            book_history = [
-                {
-                    "title": record['book_title'],
-                    "author": record['author'],
-                    "genre": record['genre'],
-                    "date": record['request_date']
-                }
-                for record in history
-            ]
-
-            # Pass both user details and borrowing history to the template
-            return render_template(
-                "reader_profile.html",
-                user=user_data,
-                book_history=book_history
-            )
-        else:
-            return redirect(url_for("login"))
+    if user_data:
+        user = user_data[0]
+        user_data = {
+            "full_name": user["user_name"],
+            "email": user["user_email"],
+            "contact": user["user_contact"],
+            "user_image": user["user_image"] if user["user_image"] else 'static/images/default_profile.png'
+        }
+        return render_template("reader-editprofile.html", user=user_data)
     else:
-        flash("You do not have permission to view this page.")
-        return redirect(url_for("login"))
-
+        flash("Error loading profile.")
+        return redirect(url_for("reader_profile"))
 
 #READER'S WISHLIST
 @app.route("/wishlist")
