@@ -35,9 +35,11 @@
             <h3 class="readers_header">Name</h3>
             <ol class="readers_list">
                 {% for reader in readers %}
-                <li data-name="{{ reader.name }}" data-email="{{ reader.email }}" data-contact="{{ reader.contact }}"
+                <li data-name="{{ reader.name }}" 
+                    data-email="{{ reader.email }}" 
+                    data-contact="{{ reader.contact }}"
                     data-history="{{ ', '.join(reader.history) }}"
-                    data-image="{{ reader.user_image if reader.user_image else url_for('static', filename='images/default_profile.png') }}"
+                    data-image="{{ reader.user_image }}"  
                     onclick="showReaderDetails(this)">
                     {{ reader.name }}
                 </li>
@@ -96,7 +98,9 @@
             document.querySelector('.contact_details').textContent = contact;
 
             // Update profile image
-            document.querySelector('.profile_image img').src = imageSrc;
+            const imageElement = document.querySelector('.profile_image img');
+            imageElement.src = imageSrc;
+            imageElement.alt = name + "'s Profile Image";
 
             // Update book history
             const bookList = document.querySelector('.book_list');

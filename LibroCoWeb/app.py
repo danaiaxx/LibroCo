@@ -428,7 +428,6 @@ def upload_image(filename):
     # Ensure the file exists in the 'uploads/images' folder
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-#READERS PAGE
 @app.route("/readers")
 def readers():
     all_users = getall_records("users")
@@ -438,6 +437,7 @@ def readers():
     for reader in readers:
         reader_id = reader['user_id']
 
+        # Fetch book history
         sql_history = """
             SELECT books.book_title 
             FROM requests
@@ -446,14 +446,14 @@ def readers():
         """
         history = getprocess(sql_history, (reader_id,))
 
-        # Ensure that the image is included in the data passed to the template
+        # Fetch user image
         sql_image = """
             SELECT user_image
             FROM profileimages
             WHERE user_id = ?
         """
         user_image = getprocess(sql_image, (reader_id,))
-        image_path = user_image[0]['user_image'] if user_image else 'static/images/default_profile.png'
+        image_path = f"static/{user_image[0]['user_image']}" if user_image else url_for('static', filename='images/default_profile.png')
 
         readers_with_history.append({
             "name": reader["user_name"],
@@ -463,9 +463,11 @@ def readers():
             "user_image": image_path  # Pass the relative image path to the template
         })
 
+    # Sort readers by name
     readers_with_history = sorted(readers_with_history, key=lambda x: x['name'].lower())
 
     return render_template("readers.html", readers=readers_with_history)
+
 
 
 
